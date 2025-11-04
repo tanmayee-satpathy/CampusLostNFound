@@ -1,15 +1,66 @@
 import React from "react";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import "../styles/components/Footer.css";
 
 const Footer = () => {
   return (
     <footer>
-      <Container className="py-3">
-        <div className="text-center">
-          <p className="mb-0">
-            &copy; {new Date().getFullYear()} LostNFound. All rights reserved.
-          </p>
-        </div>
+      <Container className="py-4">
+        <Row>
+          <Col md={4} className="mb-4 mb-md-0">
+            <h5 className="footer-title">LostNFound</h5>
+            <p className="footer-description">
+              Helping you find lost items and reunite with your belongings.
+            </p>
+          </Col>
+          
+          <Col md={4} className="mb-4 mb-md-0">
+            <h5 className="footer-title">Contact Us</h5>
+            <div className="footer-contact">
+              <div className="contact-item">
+                <FaEnvelope className="contact-icon" />
+                <a href="mailto:contact@lostnfound.com">contact@lostnfound.com</a>
+              </div>
+              <div className="contact-item">
+                <FaPhone className="contact-icon" />
+                <a href="tel:+1234567890">+1 (234) 567-8900</a>
+              </div>
+              <div className="contact-item">
+                <FaMapMarkerAlt className="contact-icon" />
+                <span>123 Main Street, Boston, MA 02115</span>
+              </div>
+            </div>
+          </Col>
+          
+          <Col md={4}>
+            <h5 className="footer-title">Follow Us</h5>
+            <div className="footer-social">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                <FaFacebook />
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                <FaTwitter />
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                <FaInstagram />
+              </a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link">
+                <FaLinkedin />
+              </a>
+            </div>
+          </Col>
+        </Row>
+        
+        <hr className="footer-divider" />
+        
+        <Row>
+          <Col className="text-center">
+            <p className="footer-copyright mb-0">
+              &copy; {new Date().getFullYear()} LostNFound. All rights reserved.
+            </p>
+          </Col>
+        </Row>
       </Container>
     </footer>
   );

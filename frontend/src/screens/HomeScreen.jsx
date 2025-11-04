@@ -2,6 +2,7 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import Item from "../components/Item";
 import items from "../items";
+import "../styles/screens/HomeScreen.css";
 
 const HomeScreen = () => {
   return (

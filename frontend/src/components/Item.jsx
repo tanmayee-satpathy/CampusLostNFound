@@ -1,5 +1,6 @@
 import React from "react";
 import { Card } from "react-bootstrap";
+import "../styles/components/Item.css";
 
 const Item = ({ item }) => {
   return (

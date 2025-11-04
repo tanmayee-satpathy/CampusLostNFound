@@ -1,0 +1,80 @@
+/* Modern Item Card Styles */
+.item-card {
+  height: 100%;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.item-image-link {
+  display: block;
+  overflow: hidden;
+  height: 250px;
+  background-color: #f8f9fa;
+}
+
+.item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.item-card:hover .item-image {
+  transform: scale(1.05);
+}
+
+.item-card .card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.item-title {
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.item-title a {
+  text-decoration: none;
+  color: #2d3436;
+  transition: color 0.3s ease;
+}
+
+.item-title a:hover {
+  color: #4ecdc4;
+}
+
+.item-title strong {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: block;
+}
+
+.item-location {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.item-location h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #636e72;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.item-link {
+  text-decoration: none;
+}
+

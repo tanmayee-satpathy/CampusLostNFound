@@ -1,6 +1,7 @@
 import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { FaUser, FaBell } from "react-icons/fa";
+import "../styles/components/Header.css";
 
 const Header = () => {
   return (
