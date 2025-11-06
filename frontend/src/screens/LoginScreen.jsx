@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
 import "../styles/screens/LoginScreen.css";
 
@@ -13,6 +14,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const LoginScreen = () => {
+  const navigate = useNavigate();
   const [isSignIn, setIsSignIn] = useState(true);
   const initialFormState = {
     email: "",
@@ -40,7 +42,42 @@ const LoginScreen = () => {
     e.preventDefault();
     if (isSignIn) {
       // Handle sign in
-      console.log("Sign in:", { email: formData.email, password: formData.password });
+      try {
+        setIsSubmitting(true);
+        const response = await fetch(`${API_BASE_URL}/api/users/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email.trim().toLowerCase(),
+            password: formData.password,
+          }),
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const message =
+            result?.message || "Invalid email or password.";
+          throw new Error(message);
+        }
+
+        // Store token and user data in localStorage
+        if (result.token) {
+          localStorage.setItem("token", result.token);
+        }
+        if (result.user) {
+          localStorage.setItem("user", JSON.stringify(result.user));
+        }
+
+        // Redirect to home page after successful login
+        navigate("/");
+      } catch (error) {
+        alert(error.message || "Unable to sign in at the moment.");
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       // Handle create account
       if (formData.password !== formData.confirmPassword) {

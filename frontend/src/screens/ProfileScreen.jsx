@@ -1,9 +1,26 @@
-import React, { useState } from "react";
-import { Container, Card, Form, Button, Row, Col, Badge, Modal } from "react-bootstrap";
-import { FaTrash, FaCheckCircle, FaSearch, FaEdit, FaLock, FaMapMarkerAlt } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Container, Card, Form, Button, Row, Col, Badge, Modal, Spinner } from "react-bootstrap";
+import { FaTrash, FaCheckCircle, FaSearch, FaEdit, FaLock, FaMapMarkerAlt, FaSignOutAlt } from "react-icons/fa";
 import "../styles/screens/ProfileScreen.css";
 
+const isBrowser = typeof window !== "undefined";
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : isBrowser
+  ? window.location.origin
+  : "http://localhost:4000";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+
 const ProfileScreen = () => {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [userPosts, setUserPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingPosts, setLoadingPosts] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -11,29 +28,63 @@ const ProfileScreen = () => {
     confirmPassword: "",
   });
 
-  // Sample user posts data (in real app, this would come from API)
-  const [userPosts, setUserPosts] = useState([
-    {
-      _id: "1",
-      name: "Black Wallet",
-      location: "Snell Library",
-      image: "/images/wallet.jpg",
-      description: "A black leather wallet containing ID and credit cards.",
-      dateFound: "2024-06-15",
-      category: "Accessories",
-      status: "searching", // "searching" or "claimed"
-    },
-    {
-      _id: "2",
-      name: "Airpods",
-      location: "Curry Student Center",
-      image: "/images/airpods.jpg",
-      description: "White Apple Airpods found near the food court.",
-      dateFound: "2024-06-14",
-      category: "Electronics",
-      status: "claimed",
-    },
-  ]);
+  // Check authentication and fetch user data
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+    
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setIsAuthenticated(true);
+    
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (err) {
+        console.error("Error parsing user data:", err);
+      }
+    }
+
+    // Fetch user's items
+    const fetchUserItems = async () => {
+      try {
+        setLoadingPosts(true);
+        // Get userId from user data in localStorage
+        let userId = null;
+        if (userData) {
+          try {
+            const parsedUser = JSON.parse(userData);
+            userId = parsedUser._id;
+            setUser(parsedUser);
+          } catch (parseErr) {
+            console.error("Error parsing user data:", parseErr);
+          }
+        }
+
+        if (userId) {
+          const response = await fetch(`${API_BASE_URL}/api/items/user/${userId}`);
+          if (response.ok) {
+            const items = await response.json();
+            setUserPosts(items);
+          } else {
+            console.error("Failed to fetch user items:", response.status);
+          }
+        } else {
+          console.error("Could not determine user ID from localStorage");
+        }
+      } catch (err) {
+        console.error("Error fetching user items:", err);
+      } finally {
+        setLoadingPosts(false);
+        setLoading(false);
+      }
+    };
+
+    fetchUserItems();
+  }, [navigate]);
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -43,40 +94,151 @@ const ProfileScreen = () => {
     });
   };
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("New passwords do not match!");
       return;
     }
-    console.log("Change password:", passwordData);
-    // Handle password change here
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setShowPasswordModal(false);
-  };
 
-  const handleDeletePost = (postId) => {
-    if (window.confirm("Are you sure you want to delete this post?")) {
-      setUserPosts(userPosts.filter((post) => post._id !== postId));
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+    
+    if (!token || !userData) {
+      alert("You must be logged in to change your password.");
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(userData);
+      const response = await fetch(`${API_BASE_URL}/api/users/password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: parsedUser._id,
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(result?.message || "Failed to change password.");
+      }
+
+      alert("Password changed successfully!");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswordModal(false);
+    } catch (error) {
+      alert(error.message || "Unable to change password at the moment.");
     }
   };
 
-  const handleStatusChange = (postId) => {
-    setUserPosts(
-      userPosts.map((post) =>
-        post._id === postId
-          ? {
-              ...post,
-              status: post.status === "searching" ? "claimed" : "searching",
-            }
-          : post
-      )
-    );
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) {
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to delete items.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/items/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.message || "Failed to delete item.");
+      }
+
+      // Remove from local state
+      setUserPosts(userPosts.filter((post) => post._id !== postId));
+      alert("Item deleted successfully!");
+    } catch (error) {
+      alert(error.message || "Unable to delete item at the moment.");
+    }
   };
+
+  const handleStatusChange = async (postId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to update item status.");
+      return;
+    }
+
+    const post = userPosts.find((p) => p._id === postId);
+    if (!post) return;
+
+    const newStatus = post.status === "searching" ? "claimed" : "searching";
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/items/${postId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.message || "Failed to update item status.");
+      }
+
+      // Update local state
+      setUserPosts(
+        userPosts.map((p) =>
+          p._id === postId ? { ...p, status: newStatus } : p
+        )
+      );
+    } catch (error) {
+      alert(error.message || "Unable to update item status at the moment.");
+    }
+  };
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      // Clear localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      
+      // Redirect to login page
+      navigate("/login");
+    }
+  };
+
+  // Don't render if not authenticated (prevents flash before redirect)
+  if (!isAuthenticated || loading) {
+    return (
+      <div className="profile-screen">
+        <Container>
+          <div className="text-center py-5">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-screen">
@@ -106,6 +268,23 @@ const ProfileScreen = () => {
                     Change Password
                   </Button>
                 </div>
+                <div className="profile-section logout-section">
+                  <h3 className="section-title">
+                    <FaSignOutAlt className="section-icon" />
+                    Logout
+                  </h3>
+                  <p className="section-description">
+                    Sign out of your account
+                  </p>
+                  <Button
+                    variant="outline-danger"
+                    className="logout-btn"
+                    onClick={handleLogout}
+                  >
+                    <FaSignOutAlt className="me-2" />
+                    Logout
+                  </Button>
+                </div>
               </Card.Body>
             </Card>
           </Col>
@@ -120,7 +299,13 @@ const ProfileScreen = () => {
                   </p>
                 </div>
 
-                {userPosts.length === 0 ? (
+                {loadingPosts ? (
+                  <div className="text-center py-4">
+                    <Spinner animation="border" role="status">
+                      <span className="visually-hidden">Loading your posts...</span>
+                    </Spinner>
+                  </div>
+                ) : userPosts.length === 0 ? (
                   <div className="no-posts">
                     <p>You haven't posted any items yet.</p>
                     <Button variant="primary" href="/post">
@@ -133,11 +318,21 @@ const ProfileScreen = () => {
                       <Card key={post._id} className="post-item-card mb-3">
                         <Row className="g-0">
                           <Col md={3} className="post-image-col">
-                            <img
-                              src={post.image}
-                              alt={post.name}
-                              className="post-item-image"
-                            />
+                            {post.image ? (
+                              <img
+                                src={
+                                  post.image.startsWith("http")
+                                    ? post.image
+                                    : `${API_BASE_URL}${post.image}`
+                                }
+                                alt={post.name}
+                                className="post-item-image"
+                              />
+                            ) : (
+                              <div className="post-item-image-placeholder">
+                                <p>No Image</p>
+                              </div>
+                            )}
                           </Col>
                           <Col md={9}>
                             <Card.Body className="p-3">

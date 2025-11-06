@@ -43,7 +43,26 @@
   width: 100%;
   height: auto;
   max-height: 600px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  background-color: #f8f9fa;
+}
+
+.item-detail-image-placeholder {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+  color: #636e72;
+  font-size: 1.25rem;
+  font-weight: 500;
+  padding: 3rem;
+}
+
+.item-detail-image-placeholder p {
+  margin: 0;
 }
 
 .item-info-card {
@@ -197,7 +216,7 @@
 .contact-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #636e72;
+  color: #636e72 !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -205,17 +224,17 @@
 .contact-value {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #2d3436;
+  color: #2d3436 !important;
 }
 
 .contact-link {
-  color: #4ecdc4;
+  color: #4ecdc4 !important;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .contact-link:hover {
-  color: #44a08d;
+  color: #44a08d !important;
   text-decoration: underline;
 }
 

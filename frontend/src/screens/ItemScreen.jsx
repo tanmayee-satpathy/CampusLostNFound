@@ -1,24 +1,98 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
 import { FaMapMarkerAlt, FaCalendarAlt, FaTag, FaEnvelope, FaPhone, FaUser } from "react-icons/fa";
-import items from "../items";
 import "../styles/screens/ItemScreen.css";
+
+const isBrowser = typeof window !== "undefined";
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : isBrowser
+  ? window.location.origin
+  : "http://localhost:4000";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const ItemScreen = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
-  const item = items.find((i) => i._id === id);
+  const [item, setItem] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(false);
+  const [error, setError] = useState(null);
 
-  // If item not found, show error or redirect
-  if (!item) {
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/items/${id}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError("Item not found");
+          } else {
+            throw new Error("Failed to fetch item");
+          }
+          return;
+        }
+        const itemData = await response.json();
+        setItem(itemData);
+
+        // Fetch user information if userId exists (the person who posted the item)
+        if (itemData.userId) {
+          try {
+            setLoadingUser(true);
+            const userResponse = await fetch(
+              `${API_BASE_URL}/api/users/profile?userId=${itemData.userId}`
+            );
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              setUser(userData);
+            } else {
+              console.error("Failed to fetch user profile:", userResponse.status);
+            }
+          } catch (err) {
+            console.error("Error fetching user:", err);
+          } finally {
+            setLoadingUser(false);
+          }
+        }
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching item:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchItem();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="item-screen">
+        <Container>
+          <div className="text-center py-5">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error || !item) {
     return (
       <div className="item-screen">
         <Container>
           <div className="not-found">
             <h2>Item Not Found</h2>
-            <p>The item you're looking for doesn't exist.</p>
+            <p>{error || "The item you're looking for doesn't exist."}</p>
             <Button onClick={() => navigate("/items")} variant="primary">
               Back to Lost Items
             </Button>
@@ -28,13 +102,20 @@ const ItemScreen = () => {
     );
   }
 
-  // Sample contact details (in real app, this would come from the user who posted)
-  const contactDetails = {
-    name: "John Doe",
-    email: "john.doe@northeastern.edu",
-    phone: "+1 (617) 555-0123",
-    nuid: "N00123456",
-  };
+  // Use user data from API, or show placeholder if not available
+  const contactDetails = user
+    ? {
+        name: user.name || "Unknown",
+        email: user.email || "N/A",
+        phone: user.phone || "N/A",
+        nuid: user.nuid || "N/A",
+      }
+    : {
+        name: "Unknown",
+        email: "N/A",
+        phone: "N/A",
+        nuid: "N/A",
+      };
 
   return (
     <div className="item-screen">
@@ -50,12 +131,22 @@ const ItemScreen = () => {
         <Row className="item-details-row">
           <Col lg={7} className="mb-4 mb-lg-0">
             <Card className="item-image-card">
-              <Card.Img
-                variant="top"
-                src={item.image}
-                alt={item.name}
-                className="item-detail-image"
-              />
+              {item.image ? (
+                <Card.Img
+                  variant="top"
+                  src={
+                    item.image.startsWith("http")
+                      ? item.image
+                      : `${API_BASE_URL}${item.image}`
+                  }
+                  alt={item.name}
+                  className="item-detail-image"
+                />
+              ) : (
+                <div className="item-detail-image-placeholder">
+                  <p>No image available</p>
+                </div>
+              )}
             </Card>
           </Col>
 
@@ -108,10 +199,17 @@ const ItemScreen = () => {
                   Contact Information
                 </h3>
                 <p className="contact-subtitle">
-                  Get in touch with the person who found this item
+                  Get in touch with the person who posted this item
                 </p>
                 
-                <Row className="mt-4">
+                {loadingUser ? (
+                  <div className="text-center py-4">
+                    <Spinner animation="border" size="sm" role="status">
+                      <span className="visually-hidden">Loading contact information...</span>
+                    </Spinner>
+                  </div>
+                ) : (
+                  <Row className="mt-4">
                   <Col md={6} className="mb-3">
                     <div className="contact-item">
                       <FaUser className="contact-icon" />
@@ -162,6 +260,7 @@ const ItemScreen = () => {
                     </div>
                   </Col>
                 </Row>
+                )}
               </Card.Body>
             </Card>
           </Col>

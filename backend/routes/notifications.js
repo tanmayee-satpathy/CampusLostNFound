@@ -3,10 +3,10 @@ const router = express.Router();
 const { getDb } = require("../config/db");
 const { ObjectId } = require("mongodb");
 
-// GET /api/notifications - Get all notifications for a user
+// GET /api/notifications - Get all notifications for a user with pagination
 router.get("/", async (req, res, next) => {
   try {
-    const { userId } = req.query;
+    const { userId, page = 1, limit = 10 } = req.query;
 
     if (!userId) {
       return res.status(400).json({ message: "User ID is required." });
@@ -15,12 +15,36 @@ router.get("/", async (req, res, next) => {
     const db = await getDb();
     const notificationsCollection = db.collection("Notifications");
 
+    // Parse pagination parameters
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Get total count for pagination
+    const totalCount = await notificationsCollection.countDocuments({ userId });
+
+    // Get paginated notifications
     const notifications = await notificationsCollection
       .find({ userId })
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
       .toArray();
 
-    res.json(notifications);
+    // Calculate total pages
+    const totalPages = Math.ceil(totalCount / limitNum);
+
+    res.json({
+      notifications,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalCount,
+        limit: limitNum,
+        hasNextPage: pageNum < totalPages,
+        hasPrevPage: pageNum > 1,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -129,7 +153,7 @@ router.delete("/:id", async (req, res, next) => {
 // POST /api/notifications - Create a new notification (typically done by system when new item is posted)
 router.post("/", async (req, res, next) => {
   try {
-    const { userId, itemId, itemName, itemLocation, itemImage, itemCategory, dateFound } = req.body;
+    const { userId, itemId, itemName, itemLocation, itemImage, itemCategory, dateFound, type } = req.body;
 
     if (!userId || !itemId) {
       return res.status(400).json({ message: "User ID and item ID are required." });
@@ -146,6 +170,7 @@ router.post("/", async (req, res, next) => {
       itemImage: itemImage || null,
       itemCategory: itemCategory || null,
       dateFound: dateFound || null,
+      type: type || "new", // "new" for new items, "claimed" for claim notifications
       read: false,
       createdAt: new Date(),
     };

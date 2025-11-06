@@ -1,54 +1,96 @@
-import React, { useState, useMemo } from "react";
-import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
+import React, { useState, useEffect, useMemo } from "react";
+import { Container, Row, Col, Form, Button, Card, Spinner } from "react-bootstrap";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Item from "../components/Item";
 import Searchbar from "../components/Searchbar";
-import items from "../items";
 import "../styles/screens/LostItemsScreen.css";
 
+const isBrowser = typeof window !== "undefined";
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : isBrowser
+  ? window.location.origin
+  : "http://localhost:4000";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+
 const LostItemsScreen = () => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     location: "",
     dateFound: "",
     category: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalCount: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
 
-  // Get unique values for filter options
+  // Fetch items from API
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (searchTerm) params.append("search", searchTerm);
+        if (filters.location) params.append("location", filters.location);
+        if (filters.dateFound) params.append("dateFound", filters.dateFound);
+        if (filters.category) params.append("category", filters.category);
+        params.append("status", "searching"); // Only get items that are searching (not claimed)
+        params.append("page", currentPage.toString());
+        params.append("limit", "12");
+
+        const response = await fetch(`${API_BASE_URL}/api/items?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch items");
+        }
+        const data = await response.json();
+        // Handle both old format (array) and new format (object with items and pagination)
+        if (Array.isArray(data)) {
+          const activeItems = data.filter((item) => item.status !== "claimed");
+          setItems(activeItems);
+        } else {
+          setItems(data.items || []);
+          if (data.pagination) {
+            setPagination(data.pagination);
+          }
+        }
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching items:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [searchTerm, filters.location, filters.dateFound, filters.category, currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters.location, filters.dateFound, filters.category]);
+
+  // Get unique values for filter options from fetched items
   const locations = useMemo(() => {
     const uniqueLocations = [...new Set(items.map((item) => item.location))];
     return uniqueLocations.sort();
-  }, []);
+  }, [items]);
 
   const categories = useMemo(() => {
     const uniqueCategories = [
       ...new Set(items.map((item) => item.category)),
     ];
     return uniqueCategories.sort();
-  }, []);
-
-  // Filter items based on search term and selected filters
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      // Search filter
-      const searchLower = searchTerm.toLowerCase();
-      const matchesSearch =
-        !searchTerm ||
-        item.name.toLowerCase().includes(searchLower) ||
-        item.location.toLowerCase().includes(searchLower) ||
-        item.category.toLowerCase().includes(searchLower) ||
-        item.description.toLowerCase().includes(searchLower);
-
-      // Filter filters
-      const matchesLocation =
-        !filters.location || item.location === filters.location;
-      const matchesDate =
-        !filters.dateFound || item.dateFound === filters.dateFound;
-      const matchesCategory =
-        !filters.category || item.category === filters.category;
-
-      return matchesSearch && matchesLocation && matchesDate && matchesCategory;
-    });
-  }, [searchTerm, filters]);
+  }, [items]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -154,26 +196,99 @@ const LostItemsScreen = () => {
         </Card>
 
         <div className="results-section">
-          <div className="results-header">
-            <h3 className="results-title">
-              {filteredItems.length === 0
-                ? "No items found"
-                : `${filteredItems.length} item${filteredItems.length !== 1 ? "s" : ""} found`}
-            </h3>
-          </div>
-
-          {filteredItems.length > 0 ? (
-            <Row className="items-row">
-              {filteredItems.map((item) => (
-                <Col key={item._id} sm={12} md={6} lg={4} xl={3}>
-                  <Item item={item} />
-                </Col>
-              ))}
-            </Row>
-          ) : (
-            <div className="no-items-message">
-              <p>No items match your current filters. Try adjusting your search criteria.</p>
+          {loading ? (
+            <div className="text-center py-5">
+              <Spinner animation="border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
             </div>
+          ) : error ? (
+            <div className="no-items-message">
+              <p>Error loading items: {error}</p>
+            </div>
+          ) : (
+            <>
+              <div className="results-header">
+                <h3 className="results-title">
+                  {items.length === 0
+                    ? "No items found"
+                    : `${pagination.totalCount || items.length} item${(pagination.totalCount || items.length) !== 1 ? "s" : ""} found`}
+                </h3>
+              </div>
+
+              {items.length > 0 ? (
+                <>
+                  <Row className="items-row">
+                    {items.map((item) => (
+                      <Col key={item._id} sm={12} md={6} lg={4} xl={3}>
+                        <Item item={item} />
+                      </Col>
+                    ))}
+                  </Row>
+
+                  {/* Pagination */}
+                  {pagination.totalPages > 1 && (
+                    <div className="pagination-container mt-4">
+                      <div className="pagination-info mb-3 text-center">
+                        <p className="text-muted mb-0">
+                          Showing page {pagination.currentPage} of {pagination.totalPages}
+                        </p>
+                      </div>
+                      <div className="pagination-controls d-flex justify-content-center align-items-center gap-2">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                          disabled={!pagination.hasPrevPage || loading}
+                        >
+                          <FaChevronLeft /> Previous
+                        </Button>
+                        
+                        <div className="page-numbers d-flex gap-1">
+                          {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                            let pageNum;
+                            if (pagination.totalPages <= 5) {
+                              pageNum = i + 1;
+                            } else if (pagination.currentPage <= 3) {
+                              pageNum = i + 1;
+                            } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                              pageNum = pagination.totalPages - 4 + i;
+                            } else {
+                              pageNum = pagination.currentPage - 2 + i;
+                            }
+                            
+                            return (
+                              <Button
+                                key={pageNum}
+                                variant={pagination.currentPage === pageNum ? "primary" : "outline-primary"}
+                                size="sm"
+                                onClick={() => setCurrentPage(pageNum)}
+                                disabled={loading}
+                              >
+                                {pageNum}
+                              </Button>
+                            );
+                          })}
+                        </div>
+
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                          disabled={!pagination.hasNextPage || loading}
+                        >
+                          Next <FaChevronRight />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-items-message">
+                  <p>No items match your current filters. Try adjusting your search criteria.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </Container>

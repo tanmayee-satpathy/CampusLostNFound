@@ -1,65 +1,154 @@
-import React, { useState } from "react";
-import { Container, Card, Badge, Button, Row, Col } from "react-bootstrap";
-import { FaMapMarkerAlt, FaTag, FaCalendarAlt, FaEye, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Container, Card, Badge, Button, Row, Col, Spinner } from "react-bootstrap";
+import { FaMapMarkerAlt, FaTag, FaCalendarAlt, FaEye, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import "../styles/screens/NotificationScreen.css";
 
+const isBrowser = typeof window !== "undefined";
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : isBrowser
+  ? window.location.origin
+  : "http://localhost:4000";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+
 const NotificationScreen = () => {
-  // Sample notifications data (in real app, this would come from API)
-  const [notifications, setNotifications] = useState([
-    {
-      _id: "1",
-      itemId: "1",
-      name: "Black Wallet",
-      location: "Snell Library",
-      image: "/images/wallet.jpg",
-      category: "Accessories",
-      dateFound: "2024-06-15",
-      createdAt: "2024-06-15T10:30:00",
-      read: false,
-    },
-    {
-      _id: "2",
-      itemId: "2",
-      name: "Airpods",
-      location: "Curry Student Center",
-      image: "/images/airpods.jpg",
-      category: "Electronics",
-      dateFound: "2024-06-14",
-      createdAt: "2024-06-14T15:45:00",
-      read: false,
-    },
-    {
-      _id: "3",
-      itemId: "3",
-      name: "Backpack",
-      location: "Churchill Hall",
-      image: "/images/backpack.jpg",
-      category: "Bags",
-      dateFound: "2024-06-13",
-      createdAt: "2024-06-13T09:20:00",
-      read: true,
-    },
-  ]);
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalCount: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
 
-  const markAsRead = (notificationId) => {
-    setNotifications(
-      notifications.map((notif) =>
-        notif._id === notificationId ? { ...notif, read: true } : notif
-      )
-    );
+  // Check authentication and get userId
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUserId(parsedUser._id);
+      } catch (err) {
+        console.error("Error parsing user data:", err);
+      }
+    }
+  }, [navigate]);
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!userId) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `${API_BASE_URL}/api/notifications?userId=${userId}&page=${currentPage}&limit=10`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch notifications");
+        }
+        const data = await response.json();
+        setNotifications(data.notifications || data);
+        if (data.pagination) {
+          setPagination(data.pagination);
+        }
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching notifications:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, [userId, currentPage]);
+
+  const markAsRead = async (notificationId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${notificationId}/read`, {
+        method: "PUT",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark notification as read");
+      }
+
+      // Update local state
+      setNotifications(
+        notifications.map((notif) =>
+          notif._id === notificationId ? { ...notif, read: true } : notif
+        )
+      );
+    } catch (err) {
+      console.error("Error marking notification as read:", err);
+      alert("Failed to mark notification as read");
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(
-      notifications.map((notif) => ({ ...notif, read: true }))
-    );
+  const markAllAsRead = async () => {
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark all notifications as read");
+      }
+
+      // Update local state
+      setNotifications(
+        notifications.map((notif) => ({ ...notif, read: true }))
+      );
+    } catch (err) {
+      console.error("Error marking all notifications as read:", err);
+      alert("Failed to mark all notifications as read");
+    }
   };
 
-  const deleteNotification = (notificationId) => {
-    setNotifications(
-      notifications.filter((notif) => notif._id !== notificationId)
-    );
+  const deleteNotification = async (notificationId) => {
+    if (!window.confirm("Are you sure you want to delete this notification?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${notificationId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete notification");
+      }
+
+      // Update local state
+      setNotifications(
+        notifications.filter((notif) => notif._id !== notificationId)
+      );
+    } catch (err) {
+      console.error("Error deleting notification:", err);
+      alert("Failed to delete notification");
+    }
   };
 
   const unreadCount = notifications.filter((notif) => !notif.read).length;
@@ -81,6 +170,42 @@ const NotificationScreen = () => {
       day: "numeric",
     });
   };
+
+  // Helper function to get image URL
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    return `${API_BASE_URL}${imagePath}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="notification-screen">
+        <Container>
+          <div className="text-center py-5">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading notifications...</span>
+            </Spinner>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="notification-screen">
+        <Container>
+          <Card className="empty-notifications-card">
+            <Card.Body className="text-center p-5">
+              <h3>Error Loading Notifications</h3>
+              <p className="text-muted">{error}</p>
+            </Card.Body>
+          </Card>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="notification-screen">
@@ -120,80 +245,154 @@ const NotificationScreen = () => {
           </Card>
         ) : (
           <div className="notifications-list">
-            {notifications.map((notification) => (
-              <Card
-                key={notification._id}
-                className={`notification-card ${!notification.read ? "unread" : ""}`}
-              >
-                <Row className="g-0">
-                  <Col xs={3} md={2} className="notification-image-col">
-                    <div className="notification-image-wrapper">
-                      <img
-                        src={notification.image}
-                        alt={notification.name}
-                        className="notification-image"
-                      />
-                      {!notification.read && (
-                        <div className="unread-indicator"></div>
-                      )}
-                    </div>
-                  </Col>
-                  <Col xs={9} md={10}>
-                    <Card.Body className="p-3">
-                      <div className="notification-content">
+            {notifications.map((notification) => {
+              // Map database fields to component fields
+              const itemName = notification.itemName || "Unknown Item";
+              const itemLocation = notification.itemLocation || "Unknown Location";
+              const itemImage = notification.itemImage || null;
+              const itemCategory = notification.itemCategory || "Other";
+              const dateFound = notification.dateFound || notification.createdAt;
+              const imageUrl = getImageUrl(itemImage);
+
+              return (
+                <Card
+                  key={notification._id}
+                  className={`notification-card ${!notification.read ? "unread" : ""}`}
+                >
+                  <Row className="g-0">
+                    <Col xs={3} md={2} className="notification-image-col">
+                      <div className="notification-image-wrapper">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={itemName}
+                            className="notification-image"
+                          />
+                        ) : (
+                          <div className="notification-image-placeholder">
+                            <p>No Image</p>
+                          </div>
+                        )}
+                        {!notification.read && (
+                          <div className="unread-indicator"></div>
+                        )}
+                      </div>
+                    </Col>
+                    <Col xs={9} md={10}>
+                      <Card.Body className="p-3">
+                        <div className="notification-content">
                         <div className="notification-main">
                           <h4 className="notification-item-name">
-                            New Item: {notification.name}
+                            {notification.type === "claimed" 
+                              ? `Item Claimed: ${itemName}` 
+                              : `New Item: ${itemName}`}
                           </h4>
-                          <div className="notification-details">
-                            <span className="notification-detail-item">
-                              <FaMapMarkerAlt className="detail-icon" />
-                              {notification.location}
-                            </span>
-                            <span className="notification-detail-item">
-                              <FaTag className="detail-icon" />
-                              {notification.category}
-                            </span>
-                            <span className="notification-detail-item">
-                              <FaCalendarAlt className="detail-icon" />
-                              Found on{" "}
-                              {new Date(
-                                notification.dateFound
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </span>
+                            <div className="notification-details">
+                              <span className="notification-detail-item">
+                                <FaMapMarkerAlt className="detail-icon" />
+                                {itemLocation}
+                              </span>
+                              <span className="notification-detail-item">
+                                <FaTag className="detail-icon" />
+                                {itemCategory}
+                              </span>
+                              <span className="notification-detail-item">
+                                <FaCalendarAlt className="detail-icon" />
+                                Found on{" "}
+                                {new Date(dateFound).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            </div>
+                            <p className="notification-time">
+                              {formatTimeAgo(notification.createdAt)}
+                            </p>
                           </div>
-                          <p className="notification-time">
-                            {formatTimeAgo(notification.createdAt)}
-                          </p>
+                          <div className="notification-actions">
+                            <Link
+                              to={`/item/${notification.itemId}`}
+                              className="view-item-btn"
+                              onClick={() => markAsRead(notification._id)}
+                            >
+                              <FaEye /> View Item
+                            </Link>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              className="delete-notification-btn"
+                              onClick={() =>
+                                deleteNotification(notification._id)
+                              }
+                            >
+                              <FaTimes />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="notification-actions">
-                          <Link
-                            to={`/item/${notification.itemId}`}
-                            className="view-item-btn"
-                            onClick={() => markAsRead(notification._id)}
-                          >
-                            <FaEye /> View Item
-                          </Link>
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            className="delete-notification-btn"
-                            onClick={() =>
-                              deleteNotification(notification._id)
-                            }
-                          >
-                            <FaTimes />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card.Body>
-                  </Col>
-                </Row>
-              </Card>
-            ))}
+                      </Card.Body>
+                    </Col>
+                  </Row>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="pagination-container mt-4">
+            <div className="pagination-info mb-3">
+              <p className="text-muted mb-0">
+                Showing page {pagination.currentPage} of {pagination.totalPages} 
+                ({pagination.totalCount} total notifications)
+              </p>
+            </div>
+            <div className="pagination-controls d-flex justify-content-center align-items-center gap-2">
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={!pagination.hasPrevPage || loading}
+              >
+                <FaChevronLeft /> Previous
+              </Button>
+              
+              <div className="page-numbers d-flex gap-1">
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pagination.currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = pagination.currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={pagination.currentPage === pageNum ? "primary" : "outline-primary"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                      disabled={loading}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                disabled={!pagination.hasNextPage || loading}
+              >
+                Next <FaChevronRight />
+              </Button>
+            </div>
           </div>
         )}
       </Container>

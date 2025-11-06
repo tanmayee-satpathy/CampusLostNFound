@@ -1,27 +1,77 @@
-import React, { useMemo } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Spinner } from "react-bootstrap";
 import Item from "../components/Item";
-import items from "../items";
 import "../styles/screens/HomeScreen.css";
 
+const isBrowser = typeof window !== "undefined";
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : isBrowser
+  ? window.location.origin
+  : "http://localhost:4000";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+
 const HomeScreen = () => {
-  const recentItems = useMemo(() => {
-    return [...items]
-      .sort((a, b) => new Date(b.dateFound) - new Date(a.dateFound))
-      .slice(0, 4);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/items`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch items");
+        }
+        const data = await response.json();
+        // Filter out items with status "claimed", then sort by dateFound (most recent first) and take first 4
+        const activeItems = data.filter((item) => item.status !== "claimed");
+        const recentItems = [...activeItems]
+          .sort((a, b) => new Date(b.dateFound) - new Date(a.dateFound))
+          .slice(0, 4);
+        setItems(recentItems);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching items:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
   }, []);
 
   return (
     <div className="home-screen">
       <Container>
         <h1 className="home-title">Recent Lost Items</h1>
-        <Row>
-          {recentItems.map((item) => (
-            <Col key={item._id} sm={12} md={6} lg={4} xl={3}>
-              <Item item={item} />
-            </Col>
-          ))}
-        </Row>
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+          </div>
+        ) : error ? (
+          <div className="text-center py-5">
+            <p>Error loading items: {error}</p>
+          </div>
+        ) : items.length > 0 ? (
+          <Row>
+            {items.map((item) => (
+              <Col key={item._id} sm={12} md={6} lg={4} xl={3}>
+                <Item item={item} />
+              </Col>
+            ))}
+          </Row>
+        ) : (
+          <div className="text-center py-5">
+            <p>No items found.</p>
+          </div>
+        )}
       </Container>
     </div>
   );

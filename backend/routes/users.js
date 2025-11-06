@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const { getDb } = require("../config/db");
 const { ObjectId } = require("mongodb");
+const { generateToken } = require("../middleware/auth");
 
 const SALT_ROUNDS = 10;
 
@@ -80,8 +81,12 @@ router.post("/login", async (req, res, next) => {
     // Remove password from response
     const { passwordHash: _, ...userWithoutPassword } = user;
 
+    // Generate JWT token
+    const token = generateToken(user);
+
     res.json({
       message: "Login successful.",
+      token,
       user: userWithoutPassword,
     });
   } catch (error) {

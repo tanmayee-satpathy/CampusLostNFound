@@ -1,8 +1,34 @@
-import React, { useState } from "react";
-import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Container, Card, Form, Button, Row, Col, Spinner } from "react-bootstrap";
 import "../styles/screens/PostScreen.css";
 
+const isBrowser = typeof window !== "undefined";
+const DEFAULT_API_BASE_URL = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : isBrowser
+  ? window.location.origin
+  : "http://localhost:4000";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+
 const PostScreen = () => {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // Redirect to login page if not authenticated
+      navigate("/login");
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [navigate]);
+
   const [formData, setFormData] = useState({
     name: "",
     location: "",
@@ -32,10 +58,72 @@ const PostScreen = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Post item:", formData);
-    // Handle form submission here
+    
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to post an item.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // Create FormData to send file and other fields
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name.trim());
+      formDataToSend.append("location", formData.location.trim());
+      formDataToSend.append("description", formData.description.trim());
+      formDataToSend.append("dateFound", formData.dateFound);
+      formDataToSend.append("category", formData.category);
+      formDataToSend.append("status", "searching");
+      
+      // Append image file if selected
+      if (formData.image) {
+        formDataToSend.append("image", formData.image);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/items`, {
+        method: "POST",
+        headers: {
+          // Don't set Content-Type header - browser will set it with boundary for FormData
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataToSend,
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message =
+          result?.message || "Failed to post item. Please try again.";
+        throw new Error(message);
+      }
+
+      // Success - show message and redirect or clear form
+      alert("Item posted successfully!");
+      
+      // Clear form
+      setFormData({
+        name: "",
+        location: "",
+        description: "",
+        dateFound: "",
+        category: "",
+        image: null,
+        imagePreview: null,
+      });
+
+      // Redirect to items page to see the new item
+      navigate("/items");
+    } catch (error) {
+      alert(error.message || "Unable to post item at the moment.");
+      console.error("Error posting item:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const categories = [
@@ -47,6 +135,11 @@ const PostScreen = () => {
     "Keys",
     "Other",
   ];
+
+  // Don't render form if not authenticated (prevents flash before redirect)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="post-screen">
@@ -95,7 +188,7 @@ const PostScreen = () => {
                   </Row>
 
                   <Form.Group className="mb-3" controlId="image">
-                    <Form.Label>Item Image *</Form.Label>
+                    <Form.Label>Item Image</Form.Label>
                     <div className="image-upload-container">
                       <Form.Control
                         type="file"
@@ -184,8 +277,23 @@ const PostScreen = () => {
                       type="submit"
                       variant="primary"
                       className="submit-btn"
+                      disabled={isSubmitting}
                     >
-                      Post Item
+                      {isSubmitting ? (
+                        <>
+                          <Spinner
+                            as="span"
+                            animation="border"
+                            size="sm"
+                            role="status"
+                            aria-hidden="true"
+                            className="me-2"
+                          />
+                          Posting...
+                        </>
+                      ) : (
+                        "Post Item"
+                      )}
                     </Button>
                     <Button
                       type="button"

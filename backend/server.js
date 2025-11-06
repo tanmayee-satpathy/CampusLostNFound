@@ -28,6 +28,9 @@ const port = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Routes
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
@@ -41,6 +44,16 @@ app.use("/api/notifications", notificationRoutes);
 app.use((err, _req, res, _next) => {
   // Central error handler to avoid leaking stack traces
   console.error(err);
+  
+  // Handle multer errors (file upload errors)
+  if (err.name === "MulterError") {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ message: "File size too large. Maximum size is 5MB." });
+    }
+    return res.status(400).json({ message: err.message || "File upload error." });
+  }
+  
+  // Handle other errors
   res.status(500).json({ message: "Internal server error." });
 });
 
