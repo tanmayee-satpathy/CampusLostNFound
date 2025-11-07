@@ -1,6 +1,7 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import Logo from "./Logo";
 import "../styles/components/Footer.css";
 
 const Footer = () => {
@@ -9,7 +10,9 @@ const Footer = () => {
       <Container className="py-4">
         <Row>
           <Col md={4} className="mb-4 mb-md-0">
-            <h5 className="footer-title">LostNFound</h5>
+            <h5 className="footer-title">
+              <Logo className="footer-logo" />
+            </h5>
             <p className="footer-description">
               Helping you find lost items and reunite with your belongings.
             </p>
@@ -67,4 +70,3 @@ const Footer = () => {
 };
 
 export default Footer;
-

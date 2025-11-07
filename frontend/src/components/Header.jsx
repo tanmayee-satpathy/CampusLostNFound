@@ -1,6 +1,7 @@
 import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { FaUser, FaBell } from "react-icons/fa";
+import Logo from "./Logo";
 import "../styles/components/Header.css";
 
 const Header = () => {
@@ -8,7 +9,9 @@ const Header = () => {
     <header>
       <Navbar bg="dark" variant="dark" expand="md" collapseOnSelect>
         <Container>
-          <Navbar.Brand href="/">LostNFound</Navbar.Brand>
+          <Navbar.Brand href="/">
+            <Logo />
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
@@ -29,4 +32,3 @@ const Header = () => {
 };
 
 export default Header;
-

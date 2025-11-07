@@ -17,6 +17,13 @@ footer .container {
   font-weight: 700;
   margin-bottom: 1rem;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.footer-logo .lnf-logo-text {
+  color: #fff;
+  font-size: 1.1rem;
 }
 
 .footer-description {
@@ -212,4 +219,3 @@ footer .contact-item span,
     font-size: 0.8rem;
   }
 }
-
