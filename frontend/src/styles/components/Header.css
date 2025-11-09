@@ -46,7 +46,7 @@ header .navbar-nav .nav-link:hover {
 }
 
 header .navbar-nav .nav-link::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -79,9 +79,8 @@ header .navbar-toggler-icon {
   header .navbar-brand {
     font-size: 1.25rem;
   }
-  
+
   header .navbar-nav .nav-link {
     margin: 0.25rem 0;
   }
 }
-

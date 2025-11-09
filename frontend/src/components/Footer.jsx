@@ -1,6 +1,14 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedin,
+} from "react-icons/fa";
 import Logo from "./Logo";
 import "../styles/components/Footer.css";
 
@@ -17,13 +25,15 @@ const Footer = () => {
               Helping you find lost items and reunite with your belongings.
             </p>
           </Col>
-          
+
           <Col md={4} className="mb-4 mb-md-0">
             <h5 className="footer-title">Contact Us</h5>
             <div className="footer-contact">
               <div className="contact-item">
                 <FaEnvelope className="contact-icon" />
-                <a href="mailto:contact@lostnfound.com">contact@lostnfound.com</a>
+                <a href="mailto:contact@lostnfound.com">
+                  contact@lostnfound.com
+                </a>
               </div>
               <div className="contact-item">
                 <FaPhone className="contact-icon" />
@@ -35,28 +45,48 @@ const Footer = () => {
               </div>
             </div>
           </Col>
-          
+
           <Col md={4}>
             <h5 className="footer-title">Follow Us</h5>
             <div className="footer-social">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-link">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-link"
+              >
                 <FaFacebook />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link">
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-link"
+              >
                 <FaTwitter />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-link">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-link"
+              >
                 <FaInstagram />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link">
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-link"
+              >
                 <FaLinkedin />
               </a>
             </div>
           </Col>
         </Row>
-        
+
         <hr className="footer-divider" />
-        
+
         <Row>
           <Col className="text-center">
             <p className="footer-copyright mb-0">

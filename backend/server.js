@@ -44,15 +44,19 @@ app.use("/api/notifications", notificationRoutes);
 app.use((err, _req, res, _next) => {
   // Central error handler to avoid leaking stack traces
   console.error(err);
-  
+
   // Handle multer errors (file upload errors)
   if (err.name === "MulterError") {
     if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({ message: "File size too large. Maximum size is 5MB." });
+      return res
+        .status(400)
+        .json({ message: "File size too large. Maximum size is 5MB." });
     }
-    return res.status(400).json({ message: err.message || "File upload error." });
+    return res
+      .status(400)
+      .json({ message: err.message || "File upload error." });
   }
-  
+
   // Handle other errors
   res.status(500).json({ message: "Internal server error." });
 });

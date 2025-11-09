@@ -60,7 +60,9 @@ router.post("/login", async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required." });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
     }
 
     const db = await getDb();
@@ -175,7 +177,9 @@ router.put("/password", async (req, res, next) => {
     if (!userId || !currentPassword || !newPassword) {
       return res
         .status(400)
-        .json({ message: "User ID, current password, and new password are required." });
+        .json({
+          message: "User ID, current password, and new password are required.",
+        });
     }
 
     if (!ObjectId.isValid(userId)) {
@@ -190,9 +194,14 @@ router.put("/password", async (req, res, next) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const passwordMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+    const passwordMatches = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash
+    );
     if (!passwordMatches) {
-      return res.status(401).json({ message: "Current password is incorrect." });
+      return res
+        .status(401)
+        .json({ message: "Current password is incorrect." });
     }
 
     const newPasswordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);

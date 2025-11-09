@@ -7,11 +7,10 @@ const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -58,8 +57,7 @@ const LoginScreen = () => {
         const result = await response.json().catch(() => null);
 
         if (!response.ok) {
-          const message =
-            result?.message || "Invalid email or password.";
+          const message = result?.message || "Invalid email or password.";
           throw new Error(message);
         }
 
@@ -106,7 +104,8 @@ const LoginScreen = () => {
 
         if (!response.ok) {
           const message =
-            result?.message || "Something went wrong while creating the account.";
+            result?.message ||
+            "Something went wrong while creating the account.";
           throw new Error(message);
         }
 
@@ -244,8 +243,8 @@ const LoginScreen = () => {
                     {isSubmitting
                       ? "Submitting..."
                       : isSignIn
-                      ? "Sign In"
-                      : "Create Account"}
+                        ? "Sign In"
+                        : "Create Account"}
                   </Button>
                 </Form>
               </Card.Body>

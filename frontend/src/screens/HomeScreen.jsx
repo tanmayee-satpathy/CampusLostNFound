@@ -7,11 +7,10 @@ const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const HomeScreen = () => {
   const [items, setItems] = useState([]);
@@ -23,7 +22,9 @@ const HomeScreen = () => {
       try {
         setLoading(true);
         // Request only searching items (not claimed) with limit of 4
-        const response = await fetch(`${API_BASE_URL}/api/items?status=searching&limit=4`);
+        const response = await fetch(
+          `${API_BASE_URL}/api/items?status=searching&limit=4`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch items");
         }
@@ -39,7 +40,7 @@ const HomeScreen = () => {
         } else {
           itemsArray = [];
         }
-        
+
         // Sort by dateFound (most recent first) and take first 4
         const recentItems = [...itemsArray]
           .sort((a, b) => new Date(b.dateFound) - new Date(a.dateFound))
@@ -90,4 +91,3 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
-

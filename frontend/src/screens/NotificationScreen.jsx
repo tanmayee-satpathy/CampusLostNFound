@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Card, Badge, Button, Row, Col, Spinner } from "react-bootstrap";
-import { FaMapMarkerAlt, FaTag, FaCalendarAlt, FaEye, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import {
+  Container,
+  Card,
+  Badge,
+  Button,
+  Row,
+  Col,
+  Spinner,
+} from "react-bootstrap";
+import {
+  FaMapMarkerAlt,
+  FaTag,
+  FaCalendarAlt,
+  FaEye,
+  FaTimes,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 import "../styles/screens/NotificationScreen.css";
 
@@ -9,11 +25,10 @@ const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const NotificationScreen = () => {
   const navigate = useNavigate();
@@ -81,9 +96,12 @@ const NotificationScreen = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/notifications/${notificationId}/read`, {
-        method: "PUT",
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/${notificationId}/read`,
+        {
+          method: "PUT",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to mark notification as read");
@@ -105,13 +123,16 @@ const NotificationScreen = () => {
     if (!userId) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/read-all`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to mark all notifications as read");
@@ -133,9 +154,12 @@ const NotificationScreen = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/notifications/${notificationId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/notifications/${notificationId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete notification");
@@ -248,10 +272,12 @@ const NotificationScreen = () => {
             {notifications.map((notification) => {
               // Map database fields to component fields
               const itemName = notification.itemName || "Unknown Item";
-              const itemLocation = notification.itemLocation || "Unknown Location";
+              const itemLocation =
+                notification.itemLocation || "Unknown Location";
               const itemImage = notification.itemImage || null;
               const itemCategory = notification.itemCategory || "Other";
-              const dateFound = notification.dateFound || notification.createdAt;
+              const dateFound =
+                notification.dateFound || notification.createdAt;
               const imageUrl = getImageUrl(itemImage);
 
               return (
@@ -281,12 +307,12 @@ const NotificationScreen = () => {
                     <Col xs={9} md={10}>
                       <Card.Body className="p-3">
                         <div className="notification-content">
-                        <div className="notification-main">
-                          <h4 className="notification-item-name">
-                            {notification.type === "claimed" 
-                              ? `Item Claimed: ${itemName}` 
-                              : `New Item: ${itemName}`}
-                          </h4>
+                          <div className="notification-main">
+                            <h4 className="notification-item-name">
+                              {notification.type === "claimed"
+                                ? `Item Claimed: ${itemName}`
+                                : `New Item: ${itemName}`}
+                            </h4>
                             <div className="notification-details">
                               <span className="notification-detail-item">
                                 <FaMapMarkerAlt className="detail-icon" />
@@ -299,10 +325,13 @@ const NotificationScreen = () => {
                               <span className="notification-detail-item">
                                 <FaCalendarAlt className="detail-icon" />
                                 Found on{" "}
-                                {new Date(dateFound).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                })}
+                                {new Date(dateFound).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )}
                               </span>
                             </div>
                             <p className="notification-time">
@@ -343,7 +372,7 @@ const NotificationScreen = () => {
           <div className="pagination-container mt-4">
             <div className="pagination-info mb-3">
               <p className="text-muted mb-0">
-                Showing page {pagination.currentPage} of {pagination.totalPages} 
+                Showing page {pagination.currentPage} of {pagination.totalPages}
                 ({pagination.totalCount} total notifications)
               </p>
             </div>
@@ -356,38 +385,52 @@ const NotificationScreen = () => {
               >
                 <FaChevronLeft /> Previous
               </Button>
-              
+
               <div className="page-numbers d-flex gap-1">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (pagination.totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (pagination.currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (pagination.currentPage >= pagination.totalPages - 2) {
-                    pageNum = pagination.totalPages - 4 + i;
-                  } else {
-                    pageNum = pagination.currentPage - 2 + i;
+                {Array.from(
+                  { length: Math.min(5, pagination.totalPages) },
+                  (_, i) => {
+                    let pageNum;
+                    if (pagination.totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (pagination.currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (
+                      pagination.currentPage >=
+                      pagination.totalPages - 2
+                    ) {
+                      pageNum = pagination.totalPages - 4 + i;
+                    } else {
+                      pageNum = pagination.currentPage - 2 + i;
+                    }
+
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={
+                          pagination.currentPage === pageNum
+                            ? "primary"
+                            : "outline-primary"
+                        }
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        disabled={loading}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
                   }
-                  
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={pagination.currentPage === pageNum ? "primary" : "outline-primary"}
-                      size="sm"
-                      onClick={() => setCurrentPage(pageNum)}
-                      disabled={loading}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
+                )}
               </div>
 
               <Button
                 variant="outline-primary"
                 size="sm"
-                onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(pagination.totalPages, prev + 1)
+                  )
+                }
                 disabled={!pagination.hasNextPage || loading}
               >
                 Next <FaChevronRight />
@@ -401,4 +444,3 @@ const NotificationScreen = () => {
 };
 
 export default NotificationScreen;
-

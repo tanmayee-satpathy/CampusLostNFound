@@ -1,18 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Card, Form, Button, Row, Col, Badge, Modal, Spinner } from "react-bootstrap";
-import { FaTrash, FaCheckCircle, FaSearch, FaEdit, FaLock, FaMapMarkerAlt, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
+import {
+  Container,
+  Card,
+  Form,
+  Button,
+  Row,
+  Col,
+  Badge,
+  Modal,
+  Spinner,
+} from "react-bootstrap";
+import {
+  FaTrash,
+  FaCheckCircle,
+  FaSearch,
+  FaEdit,
+  FaLock,
+  FaMapMarkerAlt,
+  FaSignOutAlt,
+  FaUserCircle,
+} from "react-icons/fa";
 import "../styles/screens/ProfileScreen.css";
 
 const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const ProfileScreen = () => {
   const navigate = useNavigate();
@@ -32,14 +50,14 @@ const ProfileScreen = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
-    
+
     if (!token) {
       navigate("/login");
       return;
     }
 
     setIsAuthenticated(true);
-    
+
     if (userData) {
       try {
         setUser(JSON.parse(userData));
@@ -65,7 +83,9 @@ const ProfileScreen = () => {
         }
 
         if (userId) {
-          const response = await fetch(`${API_BASE_URL}/api/items/user/${userId}`);
+          const response = await fetch(
+            `${API_BASE_URL}/api/items/user/${userId}`
+          );
           if (response.ok) {
             const items = await response.json();
             setUserPosts(items);
@@ -103,7 +123,7 @@ const ProfileScreen = () => {
 
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
-    
+
     if (!token || !userData) {
       alert("You must be logged in to change your password.");
       return;
@@ -219,7 +239,7 @@ const ProfileScreen = () => {
       // Clear localStorage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      
+
       // Redirect to login page
       navigate("/login");
     }
@@ -337,7 +357,9 @@ const ProfileScreen = () => {
                 {loadingPosts ? (
                   <div className="text-center py-4">
                     <Spinner animation="border" role="status">
-                      <span className="visually-hidden">Loading your posts...</span>
+                      <span className="visually-hidden">
+                        Loading your posts...
+                      </span>
                     </Spinner>
                   </div>
                 ) : userPosts.length === 0 ? (
@@ -373,7 +395,9 @@ const ProfileScreen = () => {
                             <Card.Body className="p-3">
                               <div className="post-item-header">
                                 <div>
-                                  <h4 className="post-item-name">{post.name}</h4>
+                                  <h4 className="post-item-name">
+                                    {post.name}
+                                  </h4>
                                   <Badge
                                     bg={
                                       post.status === "claimed"
@@ -517,7 +541,11 @@ const ProfileScreen = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" className="submit-modal-btn">
+              <Button
+                type="submit"
+                variant="primary"
+                className="submit-modal-btn"
+              >
                 Change Password
               </Button>
             </div>

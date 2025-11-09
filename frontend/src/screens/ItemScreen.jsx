@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
-import { FaMapMarkerAlt, FaCalendarAlt, FaTag, FaEnvelope, FaPhone, FaUser } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaTag,
+  FaEnvelope,
+  FaPhone,
+  FaUser,
+} from "react-icons/fa";
 import "../styles/screens/ItemScreen.css";
 
 const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const ItemScreen = () => {
   const { id } = useParams();
@@ -50,7 +56,10 @@ const ItemScreen = () => {
               const userData = await userResponse.json();
               setUser(userData);
             } else {
-              console.error("Failed to fetch user profile:", userResponse.status);
+              console.error(
+                "Failed to fetch user profile:",
+                userResponse.status
+              );
             }
           } catch (err) {
             console.error("Error fetching user:", err);
@@ -154,14 +163,14 @@ const ItemScreen = () => {
             <Card className="item-info-card">
               <Card.Body className="p-4">
                 <h1 className="item-detail-name">{item.name}</h1>
-                
+
                 <div className="item-meta">
                   <div className="meta-item">
                     <FaMapMarkerAlt className="meta-icon" />
                     <span className="meta-label">Location:</span>
                     <span className="meta-value">{item.location}</span>
                   </div>
-                  
+
                   <div className="meta-item">
                     <FaCalendarAlt className="meta-icon" />
                     <span className="meta-label">Date Found:</span>
@@ -173,7 +182,7 @@ const ItemScreen = () => {
                       })}
                     </span>
                   </div>
-                  
+
                   <div className="meta-item">
                     <FaTag className="meta-icon" />
                     <span className="meta-label">Category:</span>
@@ -201,65 +210,71 @@ const ItemScreen = () => {
                 <p className="contact-subtitle">
                   Get in touch with the person who posted this item
                 </p>
-                
+
                 {loadingUser ? (
                   <div className="text-center py-4">
                     <Spinner animation="border" size="sm" role="status">
-                      <span className="visually-hidden">Loading contact information...</span>
+                      <span className="visually-hidden">
+                        Loading contact information...
+                      </span>
                     </Spinner>
                   </div>
                 ) : (
                   <Row className="mt-4">
-                  <Col md={6} className="mb-3">
-                    <div className="contact-item">
-                      <FaUser className="contact-icon" />
-                      <div className="contact-details">
-                        <span className="contact-label">Name</span>
-                        <span className="contact-value">{contactDetails.name}</span>
+                    <Col md={6} className="mb-3">
+                      <div className="contact-item">
+                        <FaUser className="contact-icon" />
+                        <div className="contact-details">
+                          <span className="contact-label">Name</span>
+                          <span className="contact-value">
+                            {contactDetails.name}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Col>
-                  
-                  <Col md={6} className="mb-3">
-                    <div className="contact-item">
-                      <FaEnvelope className="contact-icon" />
-                      <div className="contact-details">
-                        <span className="contact-label">Email</span>
-                        <a
-                          href={`mailto:${contactDetails.email}`}
-                          className="contact-value contact-link"
-                        >
-                          {contactDetails.email}
-                        </a>
+                    </Col>
+
+                    <Col md={6} className="mb-3">
+                      <div className="contact-item">
+                        <FaEnvelope className="contact-icon" />
+                        <div className="contact-details">
+                          <span className="contact-label">Email</span>
+                          <a
+                            href={`mailto:${contactDetails.email}`}
+                            className="contact-value contact-link"
+                          >
+                            {contactDetails.email}
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                  </Col>
-                  
-                  <Col md={6} className="mb-3">
-                    <div className="contact-item">
-                      <FaPhone className="contact-icon" />
-                      <div className="contact-details">
-                        <span className="contact-label">Phone</span>
-                        <a
-                          href={`tel:${contactDetails.phone}`}
-                          className="contact-value contact-link"
-                        >
-                          {contactDetails.phone}
-                        </a>
+                    </Col>
+
+                    <Col md={6} className="mb-3">
+                      <div className="contact-item">
+                        <FaPhone className="contact-icon" />
+                        <div className="contact-details">
+                          <span className="contact-label">Phone</span>
+                          <a
+                            href={`tel:${contactDetails.phone}`}
+                            className="contact-value contact-link"
+                          >
+                            {contactDetails.phone}
+                          </a>
+                        </div>
                       </div>
-                    </div>
-                  </Col>
-                  
-                  <Col md={6} className="mb-3">
-                    <div className="contact-item">
-                      <FaTag className="contact-icon" />
-                      <div className="contact-details">
-                        <span className="contact-label">NUID</span>
-                        <span className="contact-value">{contactDetails.nuid}</span>
+                    </Col>
+
+                    <Col md={6} className="mb-3">
+                      <div className="contact-item">
+                        <FaTag className="contact-icon" />
+                        <div className="contact-details">
+                          <span className="contact-label">NUID</span>
+                          <span className="contact-value">
+                            {contactDetails.nuid}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Col>
-                </Row>
+                    </Col>
+                  </Row>
                 )}
               </Card.Body>
             </Card>
@@ -271,4 +286,3 @@ const ItemScreen = () => {
 };
 
 export default ItemScreen;
-

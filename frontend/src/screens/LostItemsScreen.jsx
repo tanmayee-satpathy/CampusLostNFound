@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Container, Row, Col, Form, Button, Card, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Card,
+  Spinner,
+} from "react-bootstrap";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import Item from "../components/Item";
 import Searchbar from "../components/Searchbar";
@@ -9,11 +17,10 @@ const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const LostItemsScreen = () => {
   const [items, setItems] = useState([]);
@@ -47,7 +54,9 @@ const LostItemsScreen = () => {
         params.append("page", currentPage.toString());
         params.append("limit", "12");
 
-        const response = await fetch(`${API_BASE_URL}/api/items?${params.toString()}`);
+        const response = await fetch(
+          `${API_BASE_URL}/api/items?${params.toString()}`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch items");
         }
@@ -72,7 +81,13 @@ const LostItemsScreen = () => {
     };
 
     fetchItems();
-  }, [searchTerm, filters.location, filters.dateFound, filters.category, currentPage]);
+  }, [
+    searchTerm,
+    filters.location,
+    filters.dateFound,
+    filters.category,
+    currentPage,
+  ]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -86,9 +101,7 @@ const LostItemsScreen = () => {
   }, [items]);
 
   const categories = useMemo(() => {
-    const uniqueCategories = [
-      ...new Set(items.map((item) => item.category)),
-    ];
+    const uniqueCategories = [...new Set(items.map((item) => item.category))];
     return uniqueCategories.sort();
   }, [items]);
 
@@ -231,50 +244,67 @@ const LostItemsScreen = () => {
                     <div className="pagination-container mt-4">
                       <div className="pagination-info mb-3 text-center">
                         <p className="text-muted mb-0">
-                          Showing page {pagination.currentPage} of {pagination.totalPages}
+                          Showing page {pagination.currentPage} of{" "}
+                          {pagination.totalPages}
                         </p>
                       </div>
                       <div className="pagination-controls d-flex justify-content-center align-items-center gap-2">
                         <Button
                           variant="outline-primary"
                           size="sm"
-                          onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                          onClick={() =>
+                            setCurrentPage((prev) => Math.max(1, prev - 1))
+                          }
                           disabled={!pagination.hasPrevPage || loading}
                         >
                           <FaChevronLeft /> Previous
                         </Button>
-                        
+
                         <div className="page-numbers d-flex gap-1">
-                          {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                            let pageNum;
-                            if (pagination.totalPages <= 5) {
-                              pageNum = i + 1;
-                            } else if (pagination.currentPage <= 3) {
-                              pageNum = i + 1;
-                            } else if (pagination.currentPage >= pagination.totalPages - 2) {
-                              pageNum = pagination.totalPages - 4 + i;
-                            } else {
-                              pageNum = pagination.currentPage - 2 + i;
+                          {Array.from(
+                            { length: Math.min(5, pagination.totalPages) },
+                            (_, i) => {
+                              let pageNum;
+                              if (pagination.totalPages <= 5) {
+                                pageNum = i + 1;
+                              } else if (pagination.currentPage <= 3) {
+                                pageNum = i + 1;
+                              } else if (
+                                pagination.currentPage >=
+                                pagination.totalPages - 2
+                              ) {
+                                pageNum = pagination.totalPages - 4 + i;
+                              } else {
+                                pageNum = pagination.currentPage - 2 + i;
+                              }
+
+                              return (
+                                <Button
+                                  key={pageNum}
+                                  variant={
+                                    pagination.currentPage === pageNum
+                                      ? "primary"
+                                      : "outline-primary"
+                                  }
+                                  size="sm"
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  disabled={loading}
+                                >
+                                  {pageNum}
+                                </Button>
+                              );
                             }
-                            
-                            return (
-                              <Button
-                                key={pageNum}
-                                variant={pagination.currentPage === pageNum ? "primary" : "outline-primary"}
-                                size="sm"
-                                onClick={() => setCurrentPage(pageNum)}
-                                disabled={loading}
-                              >
-                                {pageNum}
-                              </Button>
-                            );
-                          })}
+                          )}
                         </div>
 
                         <Button
                           variant="outline-primary"
                           size="sm"
-                          onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
+                          onClick={() =>
+                            setCurrentPage((prev) =>
+                              Math.min(pagination.totalPages, prev + 1)
+                            )
+                          }
                           disabled={!pagination.hasNextPage || loading}
                         >
                           Next <FaChevronRight />
@@ -285,7 +315,10 @@ const LostItemsScreen = () => {
                 </>
               ) : (
                 <div className="no-items-message">
-                  <p>No items match your current filters. Try adjusting your search criteria.</p>
+                  <p>
+                    No items match your current filters. Try adjusting your
+                    search criteria.
+                  </p>
                 </div>
               )}
             </>
@@ -297,4 +330,3 @@ const LostItemsScreen = () => {
 };
 
 export default LostItemsScreen;
-

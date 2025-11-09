@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Card, Form, Button, Row, Col, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Card,
+  Form,
+  Button,
+  Row,
+  Col,
+  Spinner,
+} from "react-bootstrap";
 import "../styles/screens/PostScreen.css";
 
 const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const PostScreen = () => {
   const navigate = useNavigate();
@@ -60,7 +67,7 @@ const PostScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You must be logged in to post an item.");
@@ -79,7 +86,7 @@ const PostScreen = () => {
       formDataToSend.append("dateFound", formData.dateFound);
       formDataToSend.append("category", formData.category);
       formDataToSend.append("status", "searching");
-      
+
       // Append image file if selected
       if (formData.image) {
         formDataToSend.append("image", formData.image);
@@ -104,7 +111,7 @@ const PostScreen = () => {
 
       // Success - show message and redirect or clear form
       alert("Item posted successfully!");
-      
+
       // Clear form
       setFormData({
         name: "",
@@ -325,4 +332,3 @@ const PostScreen = () => {
 };
 
 export default PostScreen;
-

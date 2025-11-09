@@ -28,7 +28,7 @@
 }
 
 .screen-title::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -15px;
   left: 50%;
@@ -149,7 +149,7 @@
   flex-wrap: wrap;
 }
 
-.items-row > [class*='col-'] {
+.items-row > [class*="col-"] {
   display: flex;
   flex-direction: column;
 }
@@ -301,4 +301,3 @@
     justify-content: center;
   }
 }
-

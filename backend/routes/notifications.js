@@ -138,7 +138,9 @@ router.delete("/:id", async (req, res, next) => {
     const db = await getDb();
     const notificationsCollection = db.collection("Notifications");
 
-    const result = await notificationsCollection.deleteOne({ _id: new ObjectId(id) });
+    const result = await notificationsCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: "Notification not found." });
@@ -153,10 +155,21 @@ router.delete("/:id", async (req, res, next) => {
 // POST /api/notifications - Create a new notification (typically done by system when new item is posted)
 router.post("/", async (req, res, next) => {
   try {
-    const { userId, itemId, itemName, itemLocation, itemImage, itemCategory, dateFound, type } = req.body;
+    const {
+      userId,
+      itemId,
+      itemName,
+      itemLocation,
+      itemImage,
+      itemCategory,
+      dateFound,
+      type,
+    } = req.body;
 
     if (!userId || !itemId) {
-      return res.status(400).json({ message: "User ID and item ID are required." });
+      return res
+        .status(400)
+        .json({ message: "User ID and item ID are required." });
     }
 
     const db = await getDb();
@@ -188,4 +201,3 @@ router.post("/", async (req, res, next) => {
 });
 
 module.exports = router;
-

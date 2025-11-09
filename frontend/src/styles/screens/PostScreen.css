@@ -10,15 +10,23 @@
 }
 
 .post-screen::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(78, 205, 196, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(68, 160, 141, 0.15) 0%, transparent 50%);
+  background:
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(78, 205, 196, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(68, 160, 141, 0.15) 0%,
+      transparent 50%
+    );
   pointer-events: none;
 }
 
@@ -80,7 +88,7 @@
 }
 
 .post-card .form-label::after {
-  content: '';
+  content: "";
 }
 
 .post-card .form-control,
@@ -261,4 +269,3 @@
     max-height: 200px;
   }
 }
-

@@ -3,7 +3,8 @@ const { ObjectId } = require("mongodb");
 const { getDb } = require("../config/db");
 
 // JWT secret from environment variables (should be set in .env)
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "your-secret-key-change-in-production";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 /**
@@ -45,13 +46,19 @@ const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(401).json({ message: "No authorization token provided." });
+      return res
+        .status(401)
+        .json({ message: "No authorization token provided." });
     }
 
     // Extract token from "Bearer <token>" format
     const parts = authHeader.split(" ");
     if (parts.length !== 2 || parts[0] !== "Bearer") {
-      return res.status(401).json({ message: "Invalid authorization header format. Use 'Bearer <token>'." });
+      return res
+        .status(401)
+        .json({
+          message: "Invalid authorization header format. Use 'Bearer <token>'.",
+        });
     }
 
     const token = parts[1];
@@ -70,7 +77,9 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid user ID in token." });
     }
 
-    const user = await usersCollection.findOne({ _id: new ObjectId(decoded.userId) });
+    const user = await usersCollection.findOne({
+      _id: new ObjectId(decoded.userId),
+    });
     if (!user) {
       return res.status(401).json({ message: "User not found." });
     }
@@ -127,7 +136,9 @@ const optionalAuthenticate = async (req, res, next) => {
     const usersCollection = db.collection("Users");
 
     if (ObjectId.isValid(decoded.userId)) {
-      const user = await usersCollection.findOne({ _id: new ObjectId(decoded.userId) });
+      const user = await usersCollection.findOne({
+        _id: new ObjectId(decoded.userId),
+      });
       if (user) {
         const { passwordHash: _, ...userWithoutPassword } = user;
         req.user = userWithoutPassword;
@@ -157,4 +168,3 @@ module.exports = {
   generateToken,
   verifyToken,
 };
-

@@ -7,11 +7,10 @@ const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE_URL = import.meta.env.DEV
   ? "http://localhost:4000"
   : isBrowser
-  ? window.location.origin
-  : "http://localhost:4000";
+    ? window.location.origin
+    : "http://localhost:4000";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL;
 
 const Item = ({ item }) => {
   // Construct full image URL if image exists
@@ -25,7 +24,12 @@ const Item = ({ item }) => {
     <Card className="mb-4 item-card h-100">
       <Link to={`/item/${item._id}`} className="item-image-link">
         {imageUrl ? (
-          <Card.Img variant="top" src={imageUrl} className="item-image" alt={item.name} />
+          <Card.Img
+            variant="top"
+            src={imageUrl}
+            className="item-image"
+            alt={item.name}
+          />
         ) : (
           <div className="item-image-placeholder">
             <p>No Image</p>
@@ -47,4 +51,3 @@ const Item = ({ item }) => {
 };
 
 export default Item;
-
