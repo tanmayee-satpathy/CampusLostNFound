@@ -56,7 +56,7 @@ const ProfileScreen = ({
     confirmPassword: "",
   });
 
-  // Check authentication and fetch user data
+  
   useEffect(() => {
     const token = storageRef.getItem("token");
     const userData = storageRef.getItem("user");
@@ -76,11 +76,11 @@ const ProfileScreen = ({
       }
     }
 
-    // Fetch user's items
+    
     const fetchUserItems = async () => {
       try {
         setLoadingPosts(true);
-        // Get userId from user data in localStorage
+        
         let userId = null;
         if (userData) {
           try {
@@ -196,7 +196,7 @@ const ProfileScreen = ({
         throw new Error(result?.message || "Failed to delete item.");
       }
 
-      // Remove from local state
+      
       setUserPosts(userPosts.filter((post) => post._id !== postId));
       alert("Item deleted successfully!");
     } catch (error) {
@@ -233,7 +233,7 @@ const ProfileScreen = ({
         throw new Error(result?.message || "Failed to update item status.");
       }
 
-      // Update local state
+      
       setUserPosts(
         userPosts.map((p) =>
           p._id === postId ? { ...p, status: newStatus } : p
@@ -246,16 +246,14 @@ const ProfileScreen = ({
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
-      // Clear localStorage
       storageRef.removeItem("token");
       storageRef.removeItem("user");
 
-      // Redirect to login page
       navigate("/login");
     }
   };
 
-  // Don't render if not authenticated (prevents flash before redirect)
+  
   if (!isAuthenticated || loading) {
     return (
       <div className="profile-screen">

@@ -7,7 +7,6 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-// GET /api/items - Get all items with optional search and filters with pagination
 router.get("/", async (req, res, next) => {
   try {
     const {
@@ -86,7 +85,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// GET /api/items/:id - Get a single item by ID
 router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -109,7 +107,6 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// POST /api/items - Creating a new item (requires authentication)
 router.post(
   "/",
   authenticate,
@@ -203,7 +200,6 @@ router.post(
   }
 );
 
-// PUT /api/items/:id - Update an item (requires authentication - can only update own items)
 router.put("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -303,7 +299,6 @@ router.put("/:id", authenticate, async (req, res, next) => {
   }
 });
 
-// DELETE /api/items/:id - Delete an item (requires authentication - can only delete own items)
 router.delete("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -338,7 +333,6 @@ router.delete("/:id", authenticate, async (req, res, next) => {
   }
 });
 
-// GET /api/items/user/:userId - Get all items by a specific user
 router.get("/user/:userId", async (req, res, next) => {
   try {
     const { userId } = req.params;

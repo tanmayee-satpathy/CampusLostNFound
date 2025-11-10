@@ -8,7 +8,6 @@ const router = express.Router();
 
 const SALT_ROUNDS = 10;
 
-// POST /api/users - Create a new user
 router.post("/", async (req, res, next) => {
   try {
     const { nuid, name, phone, email, password } = req.body;
@@ -55,7 +54,6 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// POST /api/users/login - User login
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -95,7 +93,6 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-// GET /api/users/profile - Get user profile
 router.get("/profile", async (req, res, next) => {
   try {
     const { userId } = req.query;
@@ -124,7 +121,6 @@ router.get("/profile", async (req, res, next) => {
   }
 });
 
-// PUT /api/users/profile - Update user profile
 router.put("/profile", async (req, res, next) => {
   try {
     const { userId, nuid, name, phone, email } = req.body;
@@ -167,7 +163,6 @@ router.put("/profile", async (req, res, next) => {
   }
 });
 
-// PUT /api/users/password - Change user password
 router.put("/password", async (req, res, next) => {
   try {
     const { userId, currentPassword, newPassword } = req.body;

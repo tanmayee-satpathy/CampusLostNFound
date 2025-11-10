@@ -6,7 +6,6 @@ import "../styles/components/Item.css";
 import { API_BASE_URL } from "../config/api";
 
 const Item = ({ item }) => {
-  // Construct full image URL if image exists
   const imageUrl = item.image
     ? item.image.startsWith("http")
       ? item.image

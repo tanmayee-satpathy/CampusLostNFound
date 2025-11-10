@@ -4,7 +4,6 @@ import { getDb } from "../config/db.js";
 
 const router = express.Router();
 
-// GET /api/notifications - Get all notifications for a user with pagination
 router.get("/", async (req, res, next) => {
   try {
     const { userId, page = 1, limit = 10 } = req.query;
@@ -47,7 +46,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// GET /api/notifications/unread-count - Get unread notification count
 router.get("/unread-count", async (req, res, next) => {
   try {
     const { userId } = req.query;
@@ -70,7 +68,6 @@ router.get("/unread-count", async (req, res, next) => {
   }
 });
 
-// PUT /api/notifications/:id/read - Mark a notification as read
 router.put("/:id/read", async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -97,7 +94,6 @@ router.put("/:id/read", async (req, res, next) => {
   }
 });
 
-// PUT /api/notifications/read-all - Mark all notifications as read for a user
 router.put("/read-all", async (req, res, next) => {
   try {
     const { userId } = req.body;
@@ -123,7 +119,6 @@ router.put("/read-all", async (req, res, next) => {
   }
 });
 
-// DELETE /api/notifications/:id - Delete a notification
 router.delete("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -149,7 +144,6 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-// POST /api/notifications - Create a new notification (typically done by system when new item is posted)
 router.post("/", async (req, res, next) => {
   try {
     const {
