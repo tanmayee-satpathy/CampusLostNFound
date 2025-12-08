@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { ObjectId } from "mongodb";
 import { getDb } from "../config/db.js";
 import { generateToken } from "../middleware/auth.js";
+import passport from "../config/passport.js";
 
 const router = express.Router();
 
@@ -54,33 +55,26 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.post("/login", async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+router.post("/login", (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Email and password are required." });
+  }
 
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required." });
+  passport.authenticate("local", { session: false }, (err, user, info) => {
+    if (err) {
+      return next(err);
     }
 
-    const db = await getDb();
-    const usersCollection = db.collection("Users");
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const user = await usersCollection.findOne({ email: normalizedEmail });
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password." });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      return res.status(401).json({
+        message: info?.message || "Invalid email or password.",
+      });
     }
 
     const { passwordHash: _, ...userWithoutPassword } = user;
-
     const token = generateToken(user);
 
     res.json({
@@ -88,9 +82,7 @@ router.post("/login", async (req, res, next) => {
       token,
       user: userWithoutPassword,
     });
-  } catch (error) {
-    next(error);
-  }
+  })(req, res, next);
 });
 
 router.get("/profile", async (req, res, next) => {

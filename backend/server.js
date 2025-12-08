@@ -4,6 +4,7 @@ import express from "express";
 import { fileURLToPath } from "url";
 
 import { loadEnv } from "./config/loadEnv.js";
+import passport from "./config/passport.js";
 import userRoutes from "./routes/users.js";
 import itemRoutes from "./routes/items.js";
 import notificationRoutes from "./routes/notifications.js";
@@ -17,6 +18,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 app.use(express.json());
+app.use(passport.initialize());
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
