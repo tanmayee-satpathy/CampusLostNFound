@@ -7,8 +7,8 @@ import { API_BASE_URL } from "../config/api";
 
 const noopStorage = {
   getItem: () => null,
-  setItem: () => {},
-  removeItem: () => {},
+  setItem: () => { },
+  removeItem: () => { },
 };
 
 const LoginScreen = ({
@@ -27,7 +27,6 @@ const LoginScreen = ({
     email: "",
     password: "",
     confirmPassword: "",
-    nuid: "",
     name: "",
     phone: "",
   };
@@ -86,8 +85,14 @@ const LoginScreen = ({
         alert("Passwords do not match!");
         return;
       }
+      const allowedDomain = "@kiit.ac.in";
+
+      if (!formData.email.endsWith(allowedDomain)) {
+        alert("Please use your KIIT email ID (@kiit.ac.in) to register.");
+        return;
+      }
+
       const payload = {
-        nuid: formData.nuid.trim(),
         name: formData.name.trim(),
         phone: formData.phone.trim(),
         email: formData.email.trim().toLowerCase(),
@@ -162,17 +167,7 @@ const LoginScreen = ({
                 <Form onSubmit={handleSubmit} className="mt-4">
                   {!isSignIn && (
                     <>
-                      <Form.Group className="mb-3" controlId="nuid">
-                        <Form.Label>Northeastern ID (NUID)</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="nuid"
-                          placeholder="Enter your NUID"
-                          value={formData.nuid}
-                          onChange={handleChange}
-                          required
-                        />
-                      </Form.Group>
+
 
                       <Form.Group className="mb-3" controlId="name">
                         <Form.Label>Full Name</Form.Label>
@@ -247,8 +242,8 @@ const LoginScreen = ({
                     {isSubmitting
                       ? "Submitting..."
                       : isSignIn
-                      ? "Sign In"
-                      : "Create Account"}
+                        ? "Sign In"
+                        : "Create Account"}
                   </Button>
                 </Form>
               </Card.Body>

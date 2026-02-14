@@ -37,11 +37,11 @@ const Footer = () => {
               </div>
               <div className="contact-item">
                 <FaPhone className="contact-icon" />
-                <a href="tel:+1234567890">+1 (234) 567-8900</a>
+                <a href="tel:+1234567890">+91 xxxxxxxxxx</a>
               </div>
               <div className="contact-item">
                 <FaMapMarkerAlt className="contact-icon" />
-                <span>123 Main Street, Boston, MA 02115</span>
+                <span>KIIT University, BBSR , Odisha</span>
               </div>
             </div>
           </Col>

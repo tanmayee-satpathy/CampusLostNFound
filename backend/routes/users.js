@@ -12,6 +12,12 @@ const SALT_ROUNDS = 10;
 router.post("/", async (req, res, next) => {
   try {
     const { name, phone, email, password } = req.body;
+    if (!email.endsWith("@kiit.ac.in")) {
+      return res.status(400).json({
+        message: "Only KIIT email IDs (@kiit.ac.in) are allowed to register.",
+      });
+    }
+
 
     if (!name || !phone || !email || !password) {
       return res.status(400).json({ message: "Missing required fields." });
@@ -56,6 +62,13 @@ router.post("/", async (req, res, next) => {
 
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
+
+  if (!email.endsWith("@kiit.ac.in")) {
+  return res.status(400).json({
+    message: "Please log in using your KIIT email ID (@kiit.ac.in).",
+  });
+}
+
   if (!email || !password) {
     return res
       .status(400)
@@ -114,7 +127,7 @@ router.get("/profile", async (req, res, next) => {
 
 router.put("/profile", async (req, res, next) => {
   try {
-    const { userId,name, phone, email } = req.body;
+    const { userId, name, phone, email } = req.body;
 
     if (!userId) {
       return res.status(400).json({ message: "User ID is required." });
