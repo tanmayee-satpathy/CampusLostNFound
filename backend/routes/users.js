@@ -11,9 +11,9 @@ const SALT_ROUNDS = 10;
 
 router.post("/", async (req, res, next) => {
   try {
-    const { nuid, name, phone, email, password } = req.body;
+    const { name, phone, email, password } = req.body;
 
-    if (!nuid || !name || !phone || !email || !password) {
+    if (!name || !phone || !email || !password) {
       return res.status(400).json({ message: "Missing required fields." });
     }
 
@@ -30,7 +30,6 @@ router.post("/", async (req, res, next) => {
     }
 
     const newUserData = {
-      nuid: nuid.trim(),
       name: name.trim(),
       phone: phone.trim(),
       email: normalizedEmail,
@@ -115,7 +114,7 @@ router.get("/profile", async (req, res, next) => {
 
 router.put("/profile", async (req, res, next) => {
   try {
-    const { userId, nuid, name, phone, email } = req.body;
+    const { userId,name, phone, email } = req.body;
 
     if (!userId) {
       return res.status(400).json({ message: "User ID is required." });
@@ -129,7 +128,6 @@ router.put("/profile", async (req, res, next) => {
     const usersCollection = db.collection("Users");
 
     const updateData = {};
-    if (nuid) updateData.nuid = nuid.trim();
     if (name) updateData.name = name.trim();
     if (phone) updateData.phone = phone.trim();
     if (email) updateData.email = email.trim().toLowerCase();

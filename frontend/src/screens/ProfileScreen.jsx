@@ -412,12 +412,7 @@ const ProfileScreen = ({
                         {user?.email || "Not available"}
                       </span>
                     </div>
-                    {user?.nuid && (
-                      <div className="account-info-row">
-                        <span className="account-info-label">NUID</span>
-                        <span className="account-info-value">{user.nuid}</span>
-                      </div>
-                    )}
+  
                     <div className="account-info-row phone-row">
                       <span className="account-info-label">Phone</span>
                       <span className="account-info-value phone-value">
