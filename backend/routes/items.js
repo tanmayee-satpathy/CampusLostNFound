@@ -5,6 +5,8 @@ import { getDb } from "../config/db.js";
 import { authenticate } from "../middleware/auth.js";
 import upload from "../middleware/uploadMemory.js";
 
+const VALID_STATUSES = ["SEARCHING", "CLAIM_REQUESTED", "CLAIMED"];
+
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -136,7 +138,7 @@ router.post(
         category: category.trim(),
         image: null, // will set to URL if file present
         imageData: null, // binary stored here if file present
-        status: status || "searching",
+        status: status || "SEARCHING",
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -226,7 +228,14 @@ router.put("/:id", authenticate, async (req, res, next) => {
       return res.status(404).json({ message: "Item not found." });
     }
 
-    const isClaimingItem = status === "claimed" && item.status !== "claimed";
+    if (status === "CLAIM_REQUESTED" && item.userId === req.userId) {
+      return res.status(400).json({
+        message: "Owner cannot request claim on own item.",
+      });
+    }
+    const isClaimingItem =
+      status === "CLAIMED" && item.status !== "CLAIMED";
+
     const isOwner = item.userId === req.userId;
 
     if (!isClaimingItem && !isOwner) {
@@ -258,7 +267,15 @@ router.put("/:id", authenticate, async (req, res, next) => {
     if (dateFound) updateData.dateFound = dateFound;
     if (category) updateData.category = category.trim();
     if (image !== undefined) updateData.image = image;
-    if (status) updateData.status = status;
+    if (status) {
+      if (!VALID_STATUSES.includes(status)) {
+        return res.status(400).json({
+          message: "Invalid status value.",
+        });
+      }
+      updateData.status = status;
+    }
+
 
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ message: "No fields to update." });
@@ -289,7 +306,7 @@ router.put("/:id", authenticate, async (req, res, next) => {
           dateFound: item.dateFound,
           read: false,
           createdAt: new Date(),
-          type: "claimed",
+          type: "CLAIMED",
         };
 
         await notificationsCollection.insertOne(notification);

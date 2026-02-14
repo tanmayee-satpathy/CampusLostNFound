@@ -14,7 +14,7 @@ const HomeScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
       try {
         setLoading(true);
         const response = await fetchFn(
-          `${apiBaseUrl}/api/items?status=searching&limit=4`
+          `${apiBaseUrl}/api/items?status=SEARCHING&limit=4`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch items");
@@ -22,7 +22,7 @@ const HomeScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
         const data = await response.json();
         let itemsArray = [];
         if (Array.isArray(data)) {
-          itemsArray = data.filter((item) => item.status !== "claimed");
+          itemsArray = data.filter((item) => item.status !== "CLAIMED");
         } else if (data.items && Array.isArray(data.items)) {
           itemsArray = data.items;
         } else {

@@ -312,8 +312,8 @@ const NotificationScreen = ({
                         <div className="notification-content">
                           <div className="notification-main">
                             <h4 className="notification-item-name">
-                              {notification.type === "claimed"
-                                ? `Item Claimed: ${itemName}`
+                              {notification.type === "CLAIMED"
+                                ? `Item CLAIMED: ${itemName}`
                                 : `New Item: ${itemName}`}
                             </h4>
                             <div className="notification-details">

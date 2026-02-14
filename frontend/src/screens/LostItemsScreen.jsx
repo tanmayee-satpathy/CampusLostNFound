@@ -44,7 +44,7 @@ const LostItemsScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
         if (filters.location) params.append("location", filters.location);
         if (filters.dateFound) params.append("dateFound", filters.dateFound);
         if (filters.category) params.append("category", filters.category);
-        params.append("status", "searching");
+        params.append("status", "SEARCHING");
         params.append("page", currentPage.toString());
         params.append("limit", "12");
 
@@ -56,7 +56,7 @@ const LostItemsScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
         }
         const data = await response.json();
         if (Array.isArray(data)) {
-          const activeItems = data.filter((item) => item.status !== "claimed");
+          const activeItems = data.filter((item) => item.status !== "CLAIMED");
           setItems(activeItems);
         } else {
           setItems(data.items || []);
@@ -90,7 +90,7 @@ const LostItemsScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
     const fetchAllOptions = async () => {
       try {
         const params = new URLSearchParams();
-        params.append("status", "searching");
+        params.append("status", "SEARCHING");
         params.append("limit", "1000");
 
         const response = await fetchFn(

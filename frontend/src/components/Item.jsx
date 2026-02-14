@@ -34,10 +34,19 @@ const Item = ({ item }) => {
             <strong>{item.name}</strong>
           </Link>
         </Card.Title>
+
         <Card.Text className="item-location">
           <span className="item-location-text">{item.location}</span>
         </Card.Text>
+
+        <Card.Text className="item-status">
+          <strong>Status:</strong>{" "}
+          <span className={`status-${item.status?.toLowerCase()}`}>
+            {item.status}
+          </span>
+        </Card.Text>
       </Card.Body>
+
     </Card>
   );
 };
@@ -48,6 +57,7 @@ Item.propTypes = {
     image: PropTypes.string,
     name: PropTypes.string.isRequired,
     location: PropTypes.string.isRequired,
+    status: PropTypes.string,
   }).isRequired,
 };
 

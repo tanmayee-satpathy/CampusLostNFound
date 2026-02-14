@@ -325,7 +325,7 @@ const ProfileScreen = ({
     const post = userPosts.find((p) => p._id === postId);
     if (!post) return;
 
-    const newStatus = post.status === "searching" ? "claimed" : "searching";
+    const newStatus = post.status === "SEARCHING" ? "CLAIMED" : "SEARCHING";
 
     try {
       const response = await fetchFn(`${apiBaseUrl}/api/items/${postId}`, {
@@ -581,19 +581,19 @@ const ProfileScreen = ({
                                   </h4>
                                   <Badge
                                     bg={
-                                      post.status === "claimed"
+                                      post.status === "CLAIMED"
                                         ? "success"
                                         : "warning"
                                     }
                                     className="status-badge"
                                   >
-                                    {post.status === "claimed" ? (
+                                    {post.status === "CLAIMED" ? (
                                       <>
-                                        <FaCheckCircle /> Claimed
+                                        <FaCheckCircle /> CLAIMED
                                       </>
                                     ) : (
                                       <>
-                                        <FaSearch /> Searching
+                                        <FaSearch /> SEARCHING
                                       </>
                                     )}
                                   </Badge>
@@ -601,7 +601,7 @@ const ProfileScreen = ({
                                 <div className="post-actions">
                                   <Button
                                     variant={
-                                      post.status === "searching"
+                                      post.status === "SEARCHING"
                                         ? "success"
                                         : "warning"
                                     }
@@ -609,13 +609,13 @@ const ProfileScreen = ({
                                     className="status-btn"
                                     onClick={() => handleStatusChange(post._id)}
                                   >
-                                    {post.status === "searching" ? (
+                                    {post.status === "SEARCHING" ? (
                                       <>
-                                        <FaCheckCircle /> Mark as Claimed
+                                        <FaCheckCircle /> Mark as CLAIMED
                                       </>
                                     ) : (
                                       <>
-                                        <FaSearch /> Mark as Searching
+                                        <FaSearch /> Mark as SEARCHING
                                       </>
                                     )}
                                   </Button>

@@ -92,7 +92,7 @@ const PostScreen = ({
       formDataToSend.append("description", formData.description.trim());
       formDataToSend.append("dateFound", formData.dateFound);
       formDataToSend.append("category", formData.category);
-      formDataToSend.append("status", "searching");
+      formDataToSend.append("status", "SEARCHING");
 
       if (formData.image) {
         formDataToSend.append("image", formData.image);
