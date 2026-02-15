@@ -26,10 +26,10 @@ app.use(
       "http://localhost:5173",
       "https://teal-clafoutis-90d159.netlify.app",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
+
 
 
 app.use(passport.initialize());
