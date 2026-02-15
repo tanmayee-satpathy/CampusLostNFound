@@ -1,9 +1,4 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
-if (process.env.NODE_ENV !== "production") {
-  const { loadEnv } = await import("./loadEnv.js");
-  loadEnv();
-}
-
 
 const uri = process.env.MONGODB_URI;
 
@@ -19,13 +14,13 @@ const client = new MongoClient(uri, {
   },
 });
 
-let isConnected = false;
+let db;
 
 export async function getDb() {
-  if (!isConnected) {
+  if (!db) {
     await client.connect();
-    isConnected = true;
+    db = client.db(process.env.DB_NAME || "campusLostFound");
+    console.log("MongoDB connected to", db.databaseName);
   }
-  const dbName = process.env.DB_NAME || "LostNFound";
-  return client.db(dbName);
+  return db;
 }
