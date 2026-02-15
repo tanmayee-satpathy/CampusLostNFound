@@ -87,6 +87,24 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.get("/user/:userId", async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const db = await getDb();
+    const itemsCollection = db.collection("Items");
+
+    const items = await itemsCollection
+      .find({ userId }, { projection: { imageData: 0 } })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    res.json(items);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -209,6 +227,8 @@ router.post(
     }
   }
 );
+
+
 
 router.put("/:id", authenticate, async (req, res, next) => {
   try {
@@ -358,22 +378,6 @@ router.delete("/:id", authenticate, async (req, res, next) => {
   }
 });
 
-router.get("/user/:userId", async (req, res, next) => {
-  try {
-    const { userId } = req.params;
 
-    const db = await getDb();
-    const itemsCollection = db.collection("Items");
-
-    const items = await itemsCollection
-      .find({ userId }, { projection: { imageData: 0 } })
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    res.json(items);
-  } catch (error) {
-    next(error);
-  }
-});
 
 export default router;
