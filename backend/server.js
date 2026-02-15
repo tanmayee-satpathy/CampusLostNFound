@@ -74,3 +74,11 @@ app.use((err, _req, res, _next) => {
 app.listen(port, () => {
   console.log(`API server listening on http://localhost:${port}`);
 });
+
+// Global error handler (ADD THIS)
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR:", err);
+  res.status(500).json({
+    message: err.message || "Internal server error",
+  });
+});
