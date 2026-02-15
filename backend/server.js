@@ -16,7 +16,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 4000;
 
-/* ✅ SINGLE, CORRECT CORS CONFIG */
 app.use(
   cors({
     origin: [
