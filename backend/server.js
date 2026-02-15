@@ -18,18 +18,44 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 4000;
 
-app.use(express.json());
+import cors from "cors";
+console.log("🔥 BACKEND DEPLOYED WITH CORS FIX 🔥");
+
+import cors from "cors";
 
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://teal-clafoutis-90d159.netlify.app",
+      "https://campuslostnfound.netlify.app"
     ],
     credentials: true,
   })
 );
 
+
+console.log("🔥 SERVER STARTED - CORS DEBUG 🔥");
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://campuslostnfound.netlify.app");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+app.use(express.json());
 
 
 app.use(passport.initialize());
