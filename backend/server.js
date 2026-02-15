@@ -75,8 +75,10 @@ app.listen(port, () => {
 
 // Global error handler (ADD THIS)
 app.use((err, req, res, next) => {
-  console.error("GLOBAL ERROR:", err);
+  console.error("FULL ERROR:", err);
+
   res.status(500).json({
-    message: err.message || "Internal server error",
+    message: err.message,
+    stack: err.stack,
   });
 });
