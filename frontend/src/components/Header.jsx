@@ -3,8 +3,13 @@ import { Navbar, Nav, Container } from "react-bootstrap";
 import { FaUser, FaBell } from "react-icons/fa";
 import Logo from "./Logo";
 import "../styles/components/Header.css";
+import { useNavigate } from "react-router-dom";
+
 
 const Header = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
   return (
     <header>
       <Navbar bg="dark" variant="dark" expand="md" collapseOnSelect>
@@ -17,9 +22,16 @@ const Header = () => {
             <Nav className="ms-auto">
               <Nav.Link href="/items">Lost Items</Nav.Link>
               <Nav.Link href="/post">Post an Item</Nav.Link>
-              <Nav.Link href="/notifications" aria-label="Notifications">
-                <FaBell aria-hidden="true" />
-              </Nav.Link>
+              {token && (
+                <Nav.Link
+                  onClick={() => navigate("/notifications")}
+                  aria-label="Notifications"
+                  style={{ cursor: "pointer" }}
+                >
+                  <FaBell aria-hidden="true" />
+                </Nav.Link>
+              )}
+
               <Nav.Link href="/profile">
                 <FaUser /> Profile
               </Nav.Link>

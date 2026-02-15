@@ -1,14 +1,13 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import HomeScreen from "./screens/HomeScreen";
-import LoginScreen from "./screens/LoginScreen";
 import PostScreen from "./screens/PostScreen";
 import LostItemsScreen from "./screens/LostItemsScreen";
 import ItemScreen from "./screens/ItemScreen";
-import ProfileScreen from "./screens/ProfileScreen";
 import NotificationScreen from "./screens/NotificationScreen";
+import LoginScreen from "./screens/LoginScreen";
+import ProfileScreen from "./screens/ProfileScreen";
+import HomeScreen from "./screens/HomeScreen";
 
 const App = () => {
   return (
@@ -23,6 +22,7 @@ const App = () => {
           <Route path="/post" element={<PostScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/notifications" element={<NotificationScreen />} />
+
         </Routes>
       </main>
       <Footer />
@@ -31,3 +31,5 @@ const App = () => {
 };
 
 export default App;
+
+

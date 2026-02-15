@@ -5,6 +5,10 @@ import { Container, Card, Form, Button, Row, Col } from "react-bootstrap";
 import "../styles/screens/LoginScreen.css";
 import { API_BASE_URL } from "../config/api";
 
+const token = localStorage.getItem("token");
+const userId = localStorage.getItem("userId");
+
+
 const noopStorage = {
   getItem: () => null,
   setItem: () => { },
@@ -72,6 +76,8 @@ const LoginScreen = ({
         }
         if (result.user) {
           storageRef.setItem("user", JSON.stringify(result.user));
+          storageRef.setItem("userId", result.user._id);
+
         }
 
         navigate("/");

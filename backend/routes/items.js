@@ -378,47 +378,5 @@ router.delete("/:id", authenticate, async (req, res, next) => {
   }
 });
 
-router.post("/:id/claim", authenticate, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const userId = req.userId; // from authenticate middleware
-
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid item ID." });
-    }
-
-    const db = await getDb();
-    const itemsCollection = db.collection("Items");
-
-    const item = await itemsCollection.findOne({ _id: new ObjectId(id) });
-
-    if (!item) {
-      return res.status(404).json({ message: "Item not found." });
-    }
-
-    // ❌ Owner cannot claim own item
-    if (item.userId === userId) {
-      return res.status(400).json({
-        message: "Owner cannot request claim on own item.",
-      });
-    }
-
-    await itemsCollection.updateOne(
-      { _id: new ObjectId(id) },
-      {
-        $set: {
-          status: "CLAIM_REQUESTED",
-          claimedBy: userId,
-          updatedAt: new Date(),
-        },
-      }
-    );
-
-    res.json({ message: "Claim request submitted." });
-  } catch (error) {
-    next(error);
-  }
-});
-
 
 export default router;

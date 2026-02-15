@@ -16,11 +16,15 @@ import { API_BASE_URL } from "../config/api";
 const ItemScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [item, setItem] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingUser, setLoadingUser] = useState(false);
   const [error, setError] = useState(null);
+
+  const token = localStorage.getItem("token");
+  const loggedInUserId = localStorage.getItem("userId");
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -35,6 +39,7 @@ const ItemScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
           }
           return;
         }
+
         const itemData = await response.json();
         setItem(itemData);
 
@@ -47,41 +52,28 @@ const ItemScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
             if (userResponse.ok) {
               const userData = await userResponse.json();
               setUser(userData);
-            } else {
-              console.error(
-                "Failed to fetch user profile:",
-                userResponse.status
-              );
             }
-          } catch (err) {
-            console.error("Error fetching user:", err);
           } finally {
             setLoadingUser(false);
           }
         }
+
         setError(null);
       } catch (err) {
         setError(err.message);
-        console.error("Error fetching item:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchItem();
-    }
+    if (id) fetchItem();
   }, [apiBaseUrl, fetchFn, id]);
 
   if (loading) {
     return (
       <div className="item-screen">
-        <Container>
-          <div className="text-center py-5">
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          </div>
+        <Container className="text-center py-5">
+          <Spinner animation="border" />
         </Container>
       </div>
     );
@@ -90,100 +82,137 @@ const ItemScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
   if (error || !item) {
     return (
       <div className="item-screen">
-        <Container>
-          <div className="not-found">
-            <h2>Item Not Found</h2>
-            <p>{error || "The item you're looking for doesn't exist."}</p>
-            <Button onClick={() => navigate("/items")} variant="primary">
-              Back to Lost Items
-            </Button>
-          </div>
+        <Container className="text-center py-5">
+          <h2>Item Not Found</h2>
+          <p>{error}</p>
+          <Button onClick={() => navigate("/items")}>Back</Button>
         </Container>
       </div>
     );
   }
 
-  const contactDetails = user
-    ? {
-        name: user.name || "Unknown",
-        email: user.email || "N/A",
-        phone: user.phone || "N/A",
-        nuid: user.nuid || "N/A",
-      }
-    : {
-        name: "Unknown",
-        email: "N/A",
-        phone: "N/A",
-        nuid: "N/A",
-      };
+  const isOwner = loggedInUserId && item.userId === loggedInUserId;
+
+  const requestClaim = async () => {
+    try {
+      const res = await fetchFn(`${apiBaseUrl}/api/items/${item._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "CLAIM_REQUESTED" }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      setItem((prev) => ({ ...prev, status: "CLAIM_REQUESTED" }));
+      alert("Claim request sent");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const approveClaim = async () => {
+    try {
+      const res = await fetchFn(`${apiBaseUrl}/api/items/${item._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "CLAIMED" }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      setItem((prev) => ({ ...prev, status: "CLAIMED" }));
+      alert("Item claimed successfully");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const contact = user || {};
 
   return (
     <div className="item-screen">
       <Container>
         <Button
           variant="outline-secondary"
+          className="mb-3"
           onClick={() => navigate("/items")}
-          className="back-btn"
         >
-          ← Back to Lost Items
+          ← Back
         </Button>
 
-        <Row className="item-details-row">
-          <Col lg={7} className="mb-4 mb-lg-0">
-            <Card className="item-image-card">
+        <Row>
+          <Col lg={7}>
+            <Card>
               {item.image ? (
                 <Card.Img
-                  variant="top"
                   src={
                     item.image.startsWith("http")
                       ? item.image
                       : `${apiBaseUrl}${item.image}`
                   }
-                  alt={item.name}
-                  className="item-detail-image"
                 />
               ) : (
-                <div className="item-detail-image-placeholder">
-                  <p>No image available</p>
-                </div>
+                <div className="p-5 text-center">No Image</div>
               )}
             </Card>
           </Col>
 
           <Col lg={5}>
-            <Card className="item-info-card">
-              <Card.Body className="p-4">
-                <h1 className="item-detail-name">{item.name}</h1>
+            <Card>
+              <Card.Body>
+                <h1>{item.name}</h1>
 
-                <div className="item-meta">
-                  <div className="meta-item">
-                    <FaMapMarkerAlt className="meta-icon" />
-                    <span className="meta-label">Location:</span>
-                    <span className="meta-value">{item.location}</span>
-                  </div>
+                <p>
+                  <FaMapMarkerAlt /> {item.location}
+                </p>
+                <p>
+                  <FaCalendarAlt />{" "}
+                  {new Date(item.dateFound).toLocaleDateString()}
+                </p>
+                <p>
+                  <FaTag /> {item.category}
+                </p>
 
-                  <div className="meta-item">
-                    <FaCalendarAlt className="meta-icon" />
-                    <span className="meta-label">Date Found:</span>
-                    <span className="meta-value">
-                      {new Date(item.dateFound).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
+                <hr />
 
-                  <div className="meta-item">
-                    <FaTag className="meta-icon" />
-                    <span className="meta-label">Category:</span>
-                    <span className="meta-value">{item.category}</span>
-                  </div>
-                </div>
+                <h5>Description</h5>
+                <p>{item.description}</p>
 
-                <div className="item-description">
-                  <h3 className="description-title">Description</h3>
-                  <p className="description-text">{item.description}</p>
+                {/* ACTION BUTTONS */}
+                <div className="mt-4">
+                  {token && !isOwner && item.status === "SEARCHING" && (
+                    <Button
+                      variant="warning"
+                      className="w-100"
+                      onClick={requestClaim}
+                    >
+                      Request Claim
+                    </Button>
+                  )}
+
+                  {token && isOwner && item.status === "CLAIM_REQUESTED" && (
+                    <Button
+                      variant="success"
+                      className="w-100"
+                      onClick={approveClaim}
+                    >
+                      Approve Claim
+                    </Button>
+                  )}
+
+                  {item.status === "CLAIMED" && (
+                    <p className="text-success text-center mt-2">
+                      ✅ Item has been claimed
+                    </p>
+                  )}
                 </div>
               </Card.Body>
             </Card>
@@ -191,82 +220,21 @@ const ItemScreen = ({ apiBaseUrl = API_BASE_URL, fetchFn = fetch }) => {
         </Row>
 
         <Row className="mt-4">
-          <Col lg={12}>
-            <Card className="contact-card">
-              <Card.Body className="p-4">
-                <h3 className="contact-title">
-                  <FaUser className="contact-title-icon" />
-                  Contact Information
-                </h3>
-                <p className="contact-subtitle">
-                  Get in touch with the person who posted this item
+          <Col>
+            <Card>
+              <Card.Body>
+                <h5>
+                  <FaUser /> Contact Information
+                </h5>
+                <p>
+                  <FaUser /> {contact.name || "N/A"}
                 </p>
-
-                {loadingUser ? (
-                  <div className="text-center py-4">
-                    <Spinner animation="border" size="sm" role="status">
-                      <span className="visually-hidden">
-                        Loading contact information...
-                      </span>
-                    </Spinner>
-                  </div>
-                ) : (
-                  <Row className="mt-4">
-                    <Col md={6} className="mb-3">
-                      <div className="contact-item">
-                        <FaUser className="contact-icon" />
-                        <div className="contact-details">
-                          <span className="contact-label">Name</span>
-                          <span className="contact-value">
-                            {contactDetails.name}
-                          </span>
-                        </div>
-                      </div>
-                    </Col>
-
-                    <Col md={6} className="mb-3">
-                      <div className="contact-item">
-                        <FaEnvelope className="contact-icon" />
-                        <div className="contact-details">
-                          <span className="contact-label">Email</span>
-                          <a
-                            href={`mailto:${contactDetails.email}`}
-                            className="contact-value contact-link"
-                          >
-                            {contactDetails.email}
-                          </a>
-                        </div>
-                      </div>
-                    </Col>
-
-                    <Col md={6} className="mb-3">
-                      <div className="contact-item">
-                        <FaPhone className="contact-icon" />
-                        <div className="contact-details">
-                          <span className="contact-label">Phone</span>
-                          <a
-                            href={`tel:${contactDetails.phone}`}
-                            className="contact-value contact-link"
-                          >
-                            {contactDetails.phone}
-                          </a>
-                        </div>
-                      </div>
-                    </Col>
-
-                    <Col md={6} className="mb-3">
-                      <div className="contact-item">
-                        <FaTag className="contact-icon" />
-                        <div className="contact-details">
-                          <span className="contact-label">NUID</span>
-                          <span className="contact-value">
-                            {contactDetails.nuid}
-                          </span>
-                        </div>
-                      </div>
-                    </Col>
-                  </Row>
-                )}
+                <p>
+                  <FaEnvelope /> {contact.email || "N/A"}
+                </p>
+                <p>
+                  <FaPhone /> {contact.phone || "N/A"}
+                </p>
               </Card.Body>
             </Card>
           </Col>

@@ -455,5 +455,5 @@ NotificationScreen.propTypes = {
     removeItem: PropTypes.func.isRequired,
   }),
 };
-
 export default NotificationScreen;
+
