@@ -1,9 +1,6 @@
 import jwt from "jsonwebtoken";
 import { ObjectId } from "mongodb";
 import { getDb } from "../config/db.js";
-import { loadEnv } from "../config/loadEnv.js";
-
-loadEnv();
 
 const JWT_SECRET =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";

@@ -3,7 +3,6 @@ import fs from "fs";
 import express from "express";
 import { fileURLToPath } from "url";
 
-import { loadEnv } from "./config/loadEnv.js";
 import passport from "./config/passport.js";
 import userRoutes from "./routes/users.js";
 import itemRoutes from "./routes/items.js";
@@ -13,7 +12,6 @@ import uploadsRoute from "./routes/uploads.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-loadEnv();
 
 const app = express();
 const port = process.env.PORT || 4000;
