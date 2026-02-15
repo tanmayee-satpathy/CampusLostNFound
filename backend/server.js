@@ -35,50 +35,19 @@ const frontendBuildPath = path.join(__dirname, "../frontend/dist");
 if (fs.existsSync(frontendBuildPath)) {
   app.use(express.static(frontendBuildPath));
 
-  app.use((req, res, next) => {
-    if (req.method !== "GET") {
-      return next();
-    }
-
-    if (
-      req.path.startsWith("/api") ||
-      req.path.startsWith("/uploads") ||
-      req.path === "/health"
-    ) {
-      return next();
-    }
-
-    res.sendFile(path.join(frontendBuildPath, "index.html"));
-  });
 }
 
-app.use((err, _req, res, _next) => {
-  console.error(err);
-
-  if (err.name === "MulterError") {
-    if (err.code === "LIMIT_FILE_SIZE") {
-      return res
-        .status(400)
-        .json({ message: "File size too large. Maximum size is 5MB." });
-    }
-    return res
-      .status(400)
-      .json({ message: err.message || "File upload error." });
-  }
-
-  res.status(500).json({ message: "Internal server error." });
-});
-
-app.listen(port, () => {
-  console.log(`API server listening on http://localhost:${port}`);
-});
-
-// Global error handler (ADD THIS)
 app.use((err, req, res, next) => {
-  console.error("FULL ERROR:", err);
+  console.error("🔥 REAL ERROR 🔥");
+  console.error(err);
 
   res.status(500).json({
     message: err.message,
     stack: err.stack,
   });
 });
+
+app.listen(port, () => {
+  console.log(`API server listening on http://localhost:${port}`);
+});
+
