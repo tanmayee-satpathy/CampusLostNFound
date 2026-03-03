@@ -32,12 +32,12 @@ const Footer = () => {
               <div className="contact-item">
                 <FaEnvelope className="contact-icon" />
                 <a href="mailto:contact@lostnfound.com">
-                  abc@gmail.com
+                  tanmayeesatpathy2004@gmail.com
                 </a>
               </div>
               <div className="contact-item">
                 <FaPhone className="contact-icon" />
-                <a href="tel:+1234567890">+91 xxxxxxxxxx</a>
+                <a href="tel:+1234567890">+91 8235986986</a>
               </div>
               <div className="contact-item">
                 <FaMapMarkerAlt className="contact-icon" />
